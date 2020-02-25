@@ -36,7 +36,6 @@ Usage: invisible-hand [OPTIONS] COMMAND [ARGS]...
     Toolkits for compiler-f19
 
 Options:
-    -i, --interactive  interactive mode
     -h, --help         Show this message and exit.
 
 Commands:
@@ -47,16 +46,6 @@ Commands:
     patch-project      Patch to student homeworks
 ```
 
-#### Interactive shell
-
-use option `-i` to start an interactive shell.
-
-```shell
-$ invisible-hand -i
-Invoke interactive mode
-press Ctrl-D to exit..
-> _
-```
 </details>
 
 ---
