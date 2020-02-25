@@ -1,0 +1,32 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+autopep8 = "*"
+
+[packages]
+selenium = "*"
+pandas = "*"
+beautifulsoup4 = "*"
+lxml = "*"
+ipython = "*"
+colorama = "*"
+halo = "*"
+gitpython = "*"
+requests = "*"
+iso8601 = "*"
+google-api-python-client = "*"
+google-auth-httplib2 = "*"
+google-auth-oauthlib = "*"
+tabulate = "*"
+click = "*"
+invisible-hand = {editable = true,path = "."}
+prompt-toolkit = "*"
+xlsxwriter = "*"
+pygsheets = "*"
+
+[requires]
+python_version = "3.7"

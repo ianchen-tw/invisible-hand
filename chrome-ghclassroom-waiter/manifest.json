@@ -1,0 +1,16 @@
+{
+    "name": "github classroom waiter",
+    "description": "inhect hint after github classroom is loaded",
+    "version": "0.1",
+    "manifest_version": 2,
+    "browser_action": {
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": ["*://classroom.github.com/classrooms/*/assignments/*"],
+            "js": ["execute.js"],
+            "run_at": "document_end"
+        }
+    ]
+}
