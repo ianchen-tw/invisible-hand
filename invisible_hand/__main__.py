@@ -2,7 +2,6 @@ from .utils.google_student import Gstudents
 import click
 
 from prompt_toolkit import prompt
-from click_repl import repl
 
 from .scripts.github_add_students import add_students
 from .scripts.github_event_times import event_times
