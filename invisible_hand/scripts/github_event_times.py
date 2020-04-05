@@ -82,7 +82,7 @@ def event_times(repo_hashes, org, token, deadline):
         #print("get commit time for {}".format(repo))
         spinner.text = f"({idx}/{len(parsed_repos)}) Checking {repo.name}"
         result = getRepoCommitTime(
-            org='compiler-f19', repo=repo.name, commit_hash=repo.commit_hash)
+            org=github_organization, repo=repo.name, commit_hash=repo.commit_hash)
         for r in result:
             # print(r)
             passed, delta = is_deadline_passed(
@@ -115,8 +115,7 @@ def parse_repos_string(repos: List[str]) -> List[GitHubRepoInfo]:
 
 def getRepoCommitTime(org: str, repo: str, commit_hash: str) -> List[commitInfo]:
     global github_token
-    response = get_github_endpoint_paged_list(
-        "repos/%s/%s/events" % (org, repo), github_token, verbose=False)
+    response = get_github_endpoint_paged_list("repos/{org}/{repo}/events", github_token, verbose=False)
     event_list = [x for x in response if x['type'] == 'PushEvent']
     # find the localtiome of the given commit SHA that is pushed.
     msgs = []
