@@ -20,6 +20,7 @@ from ..config.github import config_github, config_event_times
 
 from ..utils.github_scanner import LOCAL_TIMEZONE
 from ..utils.github_scanner import *
+from ..utils.github_entities import Team
 
 
 def is_deadline_passed(dl: datetime, submit: datetime) -> Tuple[bool, timedelta]:
@@ -48,7 +49,8 @@ class GitHubRepoInfo(NamedTuple):
 @click.option('--org', default=config_github['organization'], show_default=True)
 @click.option('--deadline', default=config_event_times['deadline'], show_default=True,
               help='deadline format: "yyyy-mm-dd" or any ISO8601 format string (timezone will be set to local timezone)')
-def event_times(repo_hashes, org, token, deadline):
+@click.option('--target-team', default=None, help="specific team to operate on")
+def event_times(repo_hashes, org, token, deadline, target_team):
     '''
     repo-hashes : list of <repo>:<hash> strings
         ex:
@@ -78,8 +80,19 @@ def event_times(repo_hashes, org, token, deadline):
     success_group = []
     fail_group = []
     spinner.start("Start to check late submissions")
+
+    # get team membershup info
+    if target_team is not None:
+        only_team_members = set(Team(org=github_organization, team_slug=target_team, github_token=github_token).members.keys())
+
     for idx, repo in enumerate(parsed_repos, start=1):
         #print("get commit time for {}".format(repo))
+        if target_team is not None:
+            import re
+            user_id = re.sub('hw.+-', '', repo.name )
+            print(f'user_id :{user_id}')
+            if user_id not in only_team_members:
+                continue
         spinner.text = f"({idx}/{len(parsed_repos)}) Checking {repo.name}"
         result = getRepoCommitTime(
             org=github_organization, repo=repo.name, commit_hash=repo.commit_hash)
@@ -115,7 +128,7 @@ def parse_repos_string(repos: List[str]) -> List[GitHubRepoInfo]:
 
 def getRepoCommitTime(org: str, repo: str, commit_hash: str) -> List[commitInfo]:
     global github_token
-    response = get_github_endpoint_paged_list("repos/{org}/{repo}/events", github_token, verbose=False)
+    response = get_github_endpoint_paged_list(f"repos/{org}/{repo}/events", github_token, verbose=False)
     event_list = [x for x in response if x['type'] == 'PushEvent']
     # find the localtiome of the given commit SHA that is pushed.
     msgs = []
