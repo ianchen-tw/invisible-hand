@@ -241,10 +241,12 @@ Github API use the first 7 characters of a commit's SHA-1 value to communicate, 
 
 __`--deadline`__: it will use the variable inside `github_config.ini` as default.
 
+__`--target-team`__ (optional): teams to operate on (use team-slug)
+
 #### Example
 
 ```sh
-invisible-hand event-times hw0-ianre657:cb75e99 hw0-cmprfk1:f28fbda
+invisible-hand event-times hw0-ianre657:cb75e99 hw0-cmprfk1:f28fbda --target-team="2020-inservice-students" --deadline="2019-11-12 23:59:59"
 ```
 
 #### Demo (need to be updated)
