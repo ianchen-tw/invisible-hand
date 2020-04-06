@@ -19,8 +19,6 @@ from bs4 import BeautifulSoup
 from ..config.github import config_crawl_classroom
 
 spinner = Halo(stream=sys.stderr)
-spinner.start()
-
 
 class Condition_logined:
     def __init__(self):
@@ -62,7 +60,7 @@ BaseURL = "https://classroom.github.com"
 def crawl_classroom(hw_title, login, passwd, classroom_id, output):
     '''Get student homework submitted version from github classroom
     '''
-
+    spinner.start()
     if output is not None:
         if Path(output).exists():
             spinner.info(f'Overwrite existing file: {output}')

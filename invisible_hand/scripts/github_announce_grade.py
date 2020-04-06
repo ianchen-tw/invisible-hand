@@ -19,8 +19,6 @@ from ..config.github import config_github, config_announce_grade
 from ..utils.github_scanner import get_github_endpoint_paged_list, github_headers
 from ..utils.google_student import Gstudents
 
-colorama_init()
-spinner = Halo(stream=sys.stderr)
 
 # We will use {source_repo}/{source_tmpl_issue} as the template to give students feedback
 
@@ -36,6 +34,9 @@ spinner = Halo(stream=sys.stderr)
 @click.option('--feedback-source-repo', default=config_announce_grade['feedback_source_repo'], show_default=True)
 def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
     '''announce student grades to each hw repo'''
+    colorama_init()
+    spinner = Halo(stream=sys.stderr)
+
     student_feedback_title = f"Grade for {homework_prefix}"
 
     gstudents = Gstudents()
@@ -120,12 +121,12 @@ def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
         if existed_issue_number != None:
             args['issue_number'] = existed_issue_number
             args['json_body']['state'] = "open"
-            edit_issue(**args)
+            edit_issue(spinner,**args)
         else:
-            create_issue(**args)
+            create_issue(spinner,**args)
 
 
-def edit_issue(pre_prompt_str="", owner="", repo="", headers=None, json_body="", issue_number=""):
+def edit_issue(spinner, pre_prompt_str="", owner="", repo="", headers=None, json_body="", issue_number=""):
     res = requests.patch(
         f"https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}", headers=headers, json=json_body)
     if res.status_code == 200:
@@ -142,7 +143,7 @@ def edit_issue(pre_prompt_str="", owner="", repo="", headers=None, json_body="",
             pass
 
 
-def create_issue(pre_prompt_str="", owner="", repo="", headers=None, json_body=""):
+def create_issue(spinner,pre_prompt_str="", owner="", repo="", headers=None, json_body=""):
     res = requests.post(
         f"https://api.github.com/repos/{owner}/{repo}/issues", headers=headers, json=json_body)
     if res.status_code == 201:

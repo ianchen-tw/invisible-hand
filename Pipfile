@@ -27,6 +27,9 @@ invisible-hand = {editable = true,path = "."}
 prompt-toolkit = "*"
 xlsxwriter = "*"
 pygsheets = "*"
+trio = "~=0.13"
+tqdm = "*"
+httpx = "~=0.12"
 
 [requires]
 python_version = "3.7"

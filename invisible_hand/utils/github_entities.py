@@ -1,5 +1,9 @@
 import sys
 import requests
+import asyncio
+import trio
+import httpx
+
 from typing import List
 
 from requests.models import Response
@@ -28,6 +32,15 @@ class Team:
         self.github_token = github_token
         self._get_members()
 
+        # async
+        self.httpx_headers = httpx.Headers({
+            "User-Agent": "GitHubClassroomUtils/1.0",
+            "Authorization": "token " + github_token,
+            # needed for the check-suites request
+            "Accept": "application/vnd.github.antiope-preview+json"
+        })
+        self.async_client = httpx.AsyncClient(headers=self.httpx_headers)
+
     def add_user_to_team(self, user_name) -> Response:
         res = requests.put(
             "https://api.github.com/teams/{}/memberships/{}".format(
@@ -46,6 +59,17 @@ class Team:
         }
         return requests.put("https://api.github.com/teams/{team_id}/repos/{owner}/{repo}".format(**api_param),
                             headers=github_headers(self.github_token))
+
+    async def add_team_repository_async(self, repo, permission="pull") -> Response:
+        '''If permission=pull, it is equivalent to make this team subscribe to this repo 
+        '''
+        api_param = {
+            'team_id': self.id,
+            'owner': self.org,
+            'repo': repo
+        }
+        # print(f'param: {api_param}')
+        return await self.async_client.put("https://api.github.com/teams/{team_id}/repos/{owner}/{repo}".format(**api_param))
 
     def get_memberships(self, user_name: str) -> Response:
         return requests.get("https://api.github.com/teams/{}/memberships/{}".format(self.id, user_name),
