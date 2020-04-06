@@ -3,12 +3,12 @@ import click
 
 from prompt_toolkit import prompt
 
-from .scripts.github_add_students import add_students
-from .scripts.github_event_times import event_times
-from .scripts.github_patch_project import patch_project
-from .scripts.github_announce_grade import announce_grade
-from .scripts.github_crawl_classroom import crawl_classroom
-from .scripts.github_grant_read_access import grant_read_access
+from .scripts.add_students import add_students
+from .scripts.event_times import event_times
+from .scripts.patch_project import patch_project
+from .scripts.announce_grade import announce_grade
+from .scripts.crawl_classroom import crawl_classroom
+from .scripts.grant_read_access import grant_read_access
 
 
 @click.group(invoke_without_command=True, context_settings=dict(help_option_names=["-h", "--help"]))
