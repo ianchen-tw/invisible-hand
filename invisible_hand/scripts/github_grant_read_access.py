@@ -9,7 +9,7 @@ from colorama import Fore, Back, Style
 from ..utils.github_scanner import query_matching_repos
 from ..utils.github_entities import Team
 
-from ..config.github import config_github, config_subscribe_hw
+from ..config.github import config_github, config_grant_read_access
 
 # Use a "team slug"
 # for example: "2019 Teaching-team" -> "2019_teaching-team"
@@ -17,8 +17,8 @@ from ..config.github import config_github, config_subscribe_hw
 @click.argument('hw_title')
 @click.option('--token', default=config_github['personal_access_token'], help="github access token")
 @click.option('--org', default=config_github['organization'], show_default=True)
-@click.option('--team', default=config_subscribe_hw['subscriber_team_slug'], show_default=True)
-def subscribe_hw(hw_title, token, org, team):
+@click.option('--team', default=config_grant_read_access['reader_team_slug'], show_default=True)
+def grant_read_access(hw_title, token, org, team):
     '''Grant read access right of TA's group to students' homework repo'''
     colorama_init()
     teaching_team = Team(org, team, token)
@@ -74,4 +74,4 @@ class pbar_builder():
         return tqdm(**cfg)
 
 if __name__ == "__main__":
-    subscribe_hw()
+    grant_read_access()

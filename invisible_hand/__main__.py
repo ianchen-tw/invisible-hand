@@ -5,11 +5,10 @@ from prompt_toolkit import prompt
 
 from .scripts.github_add_students import add_students
 from .scripts.github_event_times import event_times
-from .scripts.github_grant_team_access import grant_team_access
 from .scripts.github_patch_project import patch_project
 from .scripts.github_announce_grade import announce_grade
 from .scripts.github_crawl_classroom import crawl_classroom
-from .scripts.github_subscribe_hw import subscribe_hw
+from .scripts.github_grant_read_access import grant_read_access
 
 
 @click.group(invoke_without_command=True, context_settings=dict(help_option_names=["-h", "--help"]))
@@ -23,11 +22,10 @@ def cli(ctx):
 
 cli.add_command(add_students)
 cli.add_command(event_times)
-cli.add_command(grant_team_access)
 cli.add_command(patch_project)
 cli.add_command(announce_grade)
 cli.add_command(crawl_classroom)
-cli.add_command(subscribe_hw)
+cli.add_command(grant_read_access)
 
 
 def test():

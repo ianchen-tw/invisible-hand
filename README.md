@@ -91,7 +91,7 @@ invisible-hand add-students ianre657 cmprfk1 cmprfk2 cmprfk3
 
 ---
 
-### Subscribe HW
+### Grant specific team read access to H.W. repos
 
 Grant read access right of TA's group to students' homework repo
 
@@ -100,18 +100,18 @@ Grant read access right of TA's group to students' homework repo
 #### Config File
 
 + __github_config.ini__:
-  + `[subscribe_hw]:subscriber_team_slug`: team slug of your TA's group
+  + `[grant_read_access]:reader_team_slug`: team slug of your TA's group
 
 #### Format
 
 ```shell
-invisible-hand subscribe-hw <hw_title>
+invisible-hand grant-read-access <hw_title>
 ```
 
 #### Example
 
 ```shell
-invisible-hand subscribe-hw hw3
+invisible-hand grant-read-access hw3
 ```
 
 </details>

@@ -11,7 +11,7 @@ config_add_students = None
 config_event_times = None
 config_announce_grade = None
 config_crawl_classroom = None
-config_subscribe_hw = None
+config_grant_read_access = None
 
 # will be call inside invisible_hand/__init__.py
 
@@ -23,7 +23,7 @@ def init_constants():
     global config_add_students
     global config_event_times
     global config_crawl_classroom
-    global config_subscribe_hw
+    global config_grant_read_access
 
     template_name = 'github.ini'
     cfile = "github_config.ini"
@@ -41,4 +41,4 @@ def init_constants():
     config_add_students = dict(config['add_students'])
     config_announce_grade = dict(config['announce_grade'])
     config_crawl_classroom = dict(config['crawl_classroom'])
-    config_subscribe_hw = dict(config['subscribe_hw'])
+    config_grant_read_access = dict(config['grant_read_access'])
