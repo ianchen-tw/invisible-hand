@@ -15,12 +15,8 @@ from halo import Halo
 from ..config.github import config_github
 from .github_scanner import get_github_endpoint, github_headers, get_github_endpoint_paged_list
 
-
-colorama_init()
-
 def main():
     print ("nothin to run")
-
 
 class Team:
     def __init__(self, org, team_slug="", github_token=""):
@@ -31,6 +27,8 @@ class Team:
         self.members = dict()
         self.github_token = github_token
         self._get_members()
+        colorama_init()
+
 
         # async
         self.httpx_headers = httpx.Headers({

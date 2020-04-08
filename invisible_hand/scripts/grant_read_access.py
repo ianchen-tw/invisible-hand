@@ -20,6 +20,7 @@ from ..config.github import config_github, config_grant_read_access
 @click.option('--team', default=config_grant_read_access['reader_team_slug'], show_default=True)
 def grant_read_access(hw_title, token, org, team):
     '''Grant read access right of TA's group to students' homework repo'''
+    print("start script")
     colorama_init()
     teaching_team = Team(org, team, token)
 

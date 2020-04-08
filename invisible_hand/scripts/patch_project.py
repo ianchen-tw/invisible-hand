@@ -20,8 +20,7 @@ from colorama import Fore, Back, Style
 from ..utils.github_scanner import query_matching_repos, github_headers, get_github_endpoint_paged_list, query_matching_repos
 from ..config.github import config_github
 
-colorama_init(autoreset=True)
-spinner = Halo(stream=sys.stderr)
+
 
 # The Pull request we made would fetch the first issue which has the same title
 # as patch_branch to be the content
@@ -36,6 +35,10 @@ spinner = Halo(stream=sys.stderr)
 @click.option('--only-repo', nargs=1, help="only repo to patch")
 def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo):
     '''Patch to student homeworks'''
+    # init
+    colorama_init(autoreset=True)
+    spinner = Halo(stream=sys.stderr)
+
     if source_repo == '':
         source_repo = f'tmpl-{hw_prefix}-revise'
 
