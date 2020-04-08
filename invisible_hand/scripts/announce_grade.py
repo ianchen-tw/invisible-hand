@@ -98,21 +98,22 @@ def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
 
     async def push_to_remote(feedback_title, feedbacks):
     # push to remote
-        async with trio.open_nursery() as nursery:
-            for fb in feedbacks:
-                request_body = {
+        async def push_feedback(fb):
+            request_body = {
                     'title': feedback_title,
                     'body': fb['value']
                 }
-                # find existing issue name
-                issue_num = await find_existing_issue(client, org, fb['repo_name'], feedback_title)
-                if issue_num:
-                    request_body['state'] = 'open' # reopen issue
-                    url = f"https://api.github.com/repos/{org}/{fb['repo_name']}/issues/{issue_num}"
-                    nursery.start_soon(edit_issue_async, client, url, issue_num, request_body)
-                else:
-                    url = f"https://api.github.com/repos/{org}/{fb['repo_name']}/issues"
-                    nursery.start_soon(create_issue_async, client, url, request_body)
+            issue_num = await find_existing_issue(client, org, fb['repo_name'], feedback_title)
+            if issue_num:
+                request_body['state'] = 'open' # reopen issue
+                url = f"https://api.github.com/repos/{org}/{fb['repo_name']}/issues/{issue_num}"
+                await edit_issue_async(client, url, issue_num, request_body)
+            else:
+                url = f"https://api.github.com/repos/{org}/{fb['repo_name']}/issues"
+                await create_issue_async(client, url, request_body)
+        async with trio.open_nursery() as nursery:
+            for fb in feedbacks:
+                nursery.start_soon(push_feedback, fb)
 
     _, t = measure_time(trio.run)(push_to_remote, student_feedback_title, fbs)
     spinner.succeed(f"Push feedbacks to remote ... {t:5.2f} sec")
