@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from xlsxwriter.utility import xl_col_to_name
 import pygsheets
@@ -42,6 +42,16 @@ class Gstudents:
 
     def get_students(self) -> List[Dict[str, str]]:
         return get_all_record(self.sht.worksheet_by_title(self.config['main_wks_title']))
+
+    def get_student(self, student_id ) -> Optional[Dict]:
+        '''Fetch a single students info, will traverse the entire table
+            Use get_students manually if you need to get each student's info
+        '''
+        students = self.get_students()
+        for s in students:
+            if student_id == s['student_id']:
+                return s
+        return None
 
     def left_join(self, right_sheet_title) -> List[Dict[str, str]]:
         left_dicts = self.get_students()

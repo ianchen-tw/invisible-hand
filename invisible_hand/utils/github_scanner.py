@@ -14,6 +14,10 @@ import json
 import re
 from typing import List
 from datetime import datetime, timezone
+
+import trio
+import httpx
+
 from requests.models import Response
 
 scanner_cache = {}
@@ -220,6 +224,40 @@ def get_github_endpoint_paged_list(endpoint: str, github_token: str, verbose: bo
 
         result_list = result_list + result_l
 
+    return result_list
+
+async def get_github_endpoint_paged_list_async(client, endpoint: str, **kwarg) -> List[dict]:
+    paged_res = {}
+
+    async def get_page_res(url,page,**kwarg):
+        return await client.get(url,params={'page':page, **kwarg})
+
+    # first query, get total number of pages
+    page_number = 1
+    # res_first_page = client.get('https://api.github.com/' + endpoint, params={'page':page_number, **kwarg})
+    res_first_page = await get_page_res(f'https://api.github.com/{endpoint}', page_number, **kwarg)
+    paged_res[page_number] = res_first_page.json()
+
+    # serch through media string and find the last page index
+    media_link_str = str(res_first_page.headers.get('link'))
+    # print(res_first_page.headers)
+    link_to_last_page = re.compile('<https:[^>]*?\?page=(\d*)[^>]*>; rel="(last)"')
+    match = link_to_last_page.search(media_link_str)
+    last_page_idx = 1
+    if match != None:
+        last_page_idx = match.group(1)
+
+    async with trio.open_nursery() as nursery:
+        async def collect_res(i):
+            res = await get_page_res(f'https://api.github.com/{endpoint}', page_number, **kwarg)
+            paged_res[i] = res.json()
+        for i in range(1,last_page_idx+1):
+            nursery.start_soon(collect_res, i)
+
+    result_list = []
+    for i, res in paged_res.items():
+        # print(f'gather page:{i}')
+        result_list = result_list + res
     return result_list
 
 

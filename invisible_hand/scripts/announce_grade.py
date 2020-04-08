@@ -5,9 +5,14 @@ import subprocess as sp
 import string
 import requests
 
+import httpx
+import trio
+
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
+from functools import partial, wraps
+from time import time
 
 import click
 from colorama import init as colorama_init
@@ -16,7 +21,7 @@ from halo import Halo
 
 from ..config.github import config_github, config_announce_grade
 
-from ..utils.github_scanner import get_github_endpoint_paged_list, github_headers
+from ..utils.github_scanner import github_headers, get_github_endpoint_paged_list_async
 from ..utils.google_student import Gstudents
 
 
@@ -25,6 +30,14 @@ from ..utils.google_student import Gstudents
 # The Pull request we made would fetch the first issue which has the same title
 # as patch_branch to be the content
 
+def measure_time(f):
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = time()
+        result = f(*args, **kw)
+        te = time()
+        return result, te-ts
+    return wrap
 
 @click.command()
 @click.argument('homework_prefix')
@@ -34,16 +47,19 @@ from ..utils.google_student import Gstudents
 @click.option('--feedback-source-repo', default=config_announce_grade['feedback_source_repo'], show_default=True)
 def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
     '''announce student grades to each hw repo'''
+
+    # TODO: use logging lib to log messages
     colorama_init()
     spinner = Halo(stream=sys.stderr)
 
     student_feedback_title = f"Grade for {homework_prefix}"
 
     gstudents = Gstudents()
-    feedbacks = gstudents.left_join(homework_prefix)
+    feedback_vars = gstudents.left_join(homework_prefix)
 
     # Clone feedback repo & set needed variables
     cur = Path('.')
+
     for d in cur.glob("feedback-tmp-*"):
         shutil.rmtree(d)
     spinner.info("delete dated folder")
@@ -56,109 +72,108 @@ def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
     feedback_repo_path = root_folder / 'feedbacks'
 
     spinner.start(f"cloning feeback source repo : {feedback_source_repo}")
-    sp.run(['git', 'clone',
+    _, t = measure_time(sp.run)(['git', 'clone',
             f'https://github.com/{org}/{feedback_source_repo}.git', feedback_repo_path.name, ], cwd=root_folder, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
-    spinner.succeed()
+    spinner.succeed(f"cloning feeback source repo : {feedback_source_repo} ... {t:4.2f} sec")
+
+
+    client = httpx.AsyncClient(headers= httpx.Headers({
+        "User-Agent": "GitHubClassroomUtils/1.0",
+        "Authorization": "token " + token,
+        # needed for the check-suites request
+        "Accept": "application/vnd.github.antiope-preview+json"
+    }))
 
     hw_path = feedback_repo_path / homework_prefix / 'reports'
 
-    for idx, feedback in enumerate(feedbacks, start=1):
-        student_id = feedback['student_id']
-        gh_handle = feedback['github_handle']
-        if only_id != None and student_id != only_id:
-            continue
+    # generate feedbacks
+    fbs, t = measure_time(gen_feedbacks)(homework_prefix, hw_path, feedback_vars)
+    spinner.succeed(f"Generate content for feedbacks ... {t:5.3f} sec")
 
-        feedback['student_hw_repo'] = f'{homework_prefix}-{gh_handle}'
-        pre_prompt_str = f"({idx}/{len(feedbacks)}) {Fore.YELLOW}{feedback['student_hw_repo']}{Fore.RESET}"
+    # handle only_id
+    if only_id:
+        info = gstudents.get_student(only_id)
+        only_repo_name = get_hw_repo_name(homework_prefix, info['github_handle'])
+        fbs = list(filter( lambda fb: fb['repo_name'] == only_repo_name, fbs))
 
-        # Get feedabck from feedback repo
-        fb_path = hw_path/f"{student_id}.md"
-        if not fb_path.exists():
-            spinner.fail(f"{student_id}.md not exists")
-            continue
+    async def push_to_remote(feedback_title, feedbacks):
+    # push to remote
+        async with trio.open_nursery() as nursery:
+            for fb in feedbacks:
+                request_body = {
+                    'title': feedback_title,
+                    'body': fb['value']
+                }
+                # find existing issue name
+                issue_num = await find_existing_issue(client, org, fb['repo_name'], feedback_title)
+                if issue_num:
+                    request_body['state'] = 'open' # reopen issue
+                    url = f"https://api.github.com/repos/{org}/{fb['repo_name']}/issues/{issue_num}"
+                    nursery.start_soon(edit_issue_async, client, url, issue_num, request_body)
+                else:
+                    url = f"https://api.github.com/repos/{org}/{fb['repo_name']}/issues"
+                    nursery.start_soon(create_issue_async, client, url, request_body)
 
-        with open(fb_path, 'r') as fb:
-            feedback_tmpl = string.Template(fb.read())
-        feedback_body = feedback_tmpl.safe_substitute(feedback)
+    _, t = measure_time(trio.run)(push_to_remote, student_feedback_title, fbs)
+    spinner.succeed(f"Push feedbacks to remote ... {t:5.2f} sec")
+    spinner.succeed(f'finished announce grade')
+    return
 
-        # print('===========')
-        # print(feedback_body)
-        # print('===========')
+def get_hw_repo_name( hw_prefix, gh_handle):
+    return f'{hw_prefix}-{gh_handle}'
 
-        issue_request_body = {
-            # feedback title
-            "title": student_feedback_title,
-            "body": feedback_body
-        }
+def gen_feedbacks(hw_prefix, fb_root_path, fb_vars) -> List[Dict]:
+    # substitude with template info
+    result = []
+    for vars in fb_vars:
+        feedback = {'repo_name': None, 'value': None}
+        # generate names for student h.w. repos
+        student_id, handle = vars['student_id'], vars['github_handle']
+        repo_name = get_hw_repo_name(hw_prefix, handle)
+        feedback['repo_name'] = repo_name
+        # fetch each students feedback template file by id
+        fb_tmpl_file = fb_root_path/f'{student_id}.md'
+        if fb_tmpl_file.exists():
+            # substitude value inside feedback template
+            with open(fb_tmpl_file, 'r') as tmpl_file:
+                fb_tmpl = string.Template(tmpl_file.read())
+                feedback['value'] = fb_tmpl.safe_substitute(vars)
 
-        existed_issue_number = None
-        spinner.start(f"{pre_prompt_str} fetch issues...")
+        if feedback['repo_name'] and feedback['value']:
+            result.append(feedback)
+    return result
+
+async def find_existing_issue(client, org, repo_name, issue_title) -> Optional[int]:
+    # TODO: remove argument: org
+    # print(f'finding existing issue... :{repo_name}/{issue_title}')
+    issues = await get_github_endpoint_paged_list_async(
+        client, f"repos/{org}/{repo_name}/issues", state='all')
+    # TODO: deal with repo not exist case
+    if len(issues) != 0:
         try:
-            issues = get_github_endpoint_paged_list(
-                endpoint=f"repos/{org}/{feedback['student_hw_repo']}/issues",
-                github_token=token, verbose=False, state='all')
+            issue = next(i for i in issues if i['title'] == issue_title)
+            return int(issue['number'])
         except:
-            spinner.text = f"{pre_prompt_str} {Back.RED}{Fore.BLACK} Failed on fetch repo {Style.RESET_ALL}"
-            spinner.fail()
-            continue
+            pass
+    return None
 
-        if len(issues) != 0:
-            existed_issue_number = None
-            try:
-                issue = next(
-                    i for i in issues if i['title'] == student_feedback_title)
-                existed_issue_number = str(issue['number'])
-            except:
-                existed_issue_number = None
-        # spinner.info(f'edit issue number:{existed_issue_number}')
-        args = {
-            'pre_prompt_str': pre_prompt_str,
-            'owner': org,
-            'repo': feedback['student_hw_repo'],
-            'headers': github_headers(token),
-            'json_body': issue_request_body
-        }
-        if existed_issue_number != None:
-            args['issue_number'] = existed_issue_number
-            args['json_body']['state'] = "open"
-            edit_issue(spinner,**args)
-        else:
-            create_issue(spinner,**args)
-
-
-def edit_issue(spinner, pre_prompt_str="", owner="", repo="", headers=None, json_body="", issue_number=""):
-    res = requests.patch(
-        f"https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}", headers=headers, json=json_body)
-    if res.status_code == 200:
-        spinner.text = pre_prompt_str + \
-            f" {Fore.BLACK}{Back.GREEN} Delivered {Style.RESET_ALL}"
-        spinner.succeed()
-    else:
-        spinner.text = (pre_prompt_str + f" {Back.RED}{Fore.BLACK} Failed {Style.RESET_ALL}"
-                        + f" Cannot edit issue in {Fore.CYAN}{repo}{Fore.RESET}")
-        spinner.fail()
+async def edit_issue_async( client, url, issue_number, requst_body):
+    res = await client.patch(url, json=requst_body)
+    if res.status_code != 200:
+        print(f'failed on editing issue: {url}')
         try:
-            print(f"    {Fore.RED}{res.json()['errors'][0]['message']}")
+            print(f"{res.json()['errors'][0]['message']}")
         except:
             pass
 
-
-def create_issue(spinner,pre_prompt_str="", owner="", repo="", headers=None, json_body=""):
-    res = requests.post(
-        f"https://api.github.com/repos/{owner}/{repo}/issues", headers=headers, json=json_body)
-    if res.status_code == 201:
-        spinner.text = pre_prompt_str + \
-            f" {Fore.BLACK}{Back.GREEN} Delivered {Style.RESET_ALL}"
-        spinner.succeed()
-    else:
-        spinner.text = (pre_prompt_str + f" {Back.RED}{Fore.BLACK} Failed {Style.RESET_ALL}"
-                        + f" Cannot create issue to {Fore.CYAN}{repo}{Fore.RESET}")
-        spinner.fail()
+async def create_issue_async(client, url, request_body):
+    res = await client.post(url, json=request_body)
+    if res.status_code != 201:
+        print(f'failed on {url}')
         try:
-            print(f"    {Fore.RED}{res.json()['errors'][0]['message']}")
+            print(f"{res.json()['errors'][0]['message']}")
         except:
             pass
-
 
 if __name__ == "__main__":
     announce_grade()
