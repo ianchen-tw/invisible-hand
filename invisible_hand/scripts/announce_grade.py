@@ -39,6 +39,7 @@ def measure_time(f):
         return result, te-ts
     return wrap
 
+
 @click.command()
 @click.argument('homework_prefix')
 @click.option('--token', default=config_github['personal_access_token'], help="github access token")
@@ -73,11 +74,10 @@ def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
 
     spinner.start(f"cloning feeback source repo : {feedback_source_repo}")
     _, t = measure_time(sp.run)(['git', 'clone',
-            f'https://github.com/{org}/{feedback_source_repo}.git', feedback_repo_path.name, ], cwd=root_folder, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
-    spinner.succeed(f"cloning feeback source repo : {feedback_source_repo} ... {t:4.2f} sec")
-
-
-    client = httpx.AsyncClient(headers= httpx.Headers({
+                                 f'https://github.com/{org}/{feedback_source_repo}.git', feedback_repo_path.name, ], cwd=root_folder, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+    spinner.succeed(
+        f"cloning feeback source repo : {feedback_source_repo} ... {t:4.2f} sec")
+    client = httpx.AsyncClient(headers=httpx.Headers({
         "User-Agent": "GitHubClassroomUtils/1.0",
         "Authorization": "token " + token,
         # needed for the check-suites request
@@ -87,25 +87,27 @@ def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
     hw_path = feedback_repo_path / homework_prefix / 'reports'
 
     # generate feedbacks
-    fbs, t = measure_time(gen_feedbacks)(homework_prefix, hw_path, feedback_vars)
+    fbs, t = measure_time(gen_feedbacks)(
+        homework_prefix, hw_path, feedback_vars)
     spinner.succeed(f"Generate content for feedbacks ... {t:5.3f} sec")
 
     # handle only_id
     if only_id:
         info = gstudents.get_student(only_id)
-        only_repo_name = get_hw_repo_name(homework_prefix, info['github_handle'])
-        fbs = list(filter( lambda fb: fb['repo_name'] == only_repo_name, fbs))
+        only_repo_name = get_hw_repo_name(
+            homework_prefix, info['github_handle'])
+        fbs = list(filter(lambda fb: fb['repo_name'] == only_repo_name, fbs))
 
     async def push_to_remote(feedback_title, feedbacks):
-    # push to remote
+        # push to remote
         async def push_feedback(fb):
             request_body = {
-                    'title': feedback_title,
-                    'body': fb['value']
-                }
+                'title': feedback_title,
+                'body': fb['value']
+            }
             issue_num = await find_existing_issue(client, org, fb['repo_name'], feedback_title)
             if issue_num:
-                request_body['state'] = 'open' # reopen issue
+                request_body['state'] = 'open'  # reopen issue
                 url = f"https://api.github.com/repos/{org}/{fb['repo_name']}/issues/{issue_num}"
                 await edit_issue_async(client, url, issue_num, request_body)
             else:
@@ -120,8 +122,10 @@ def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
     spinner.succeed(f'finished announce grade')
     return
 
-def get_hw_repo_name( hw_prefix, gh_handle):
+
+def get_hw_repo_name(hw_prefix, gh_handle):
     return f'{hw_prefix}-{gh_handle}'
+
 
 def gen_feedbacks(hw_prefix, fb_root_path, fb_vars) -> List[Dict]:
     # substitude with template info
@@ -144,6 +148,7 @@ def gen_feedbacks(hw_prefix, fb_root_path, fb_vars) -> List[Dict]:
             result.append(feedback)
     return result
 
+
 async def find_existing_issue(client, org, repo_name, issue_title) -> Optional[int]:
     # TODO: remove argument: org
     # print(f'finding existing issue... :{repo_name}/{issue_title}')
@@ -158,7 +163,8 @@ async def find_existing_issue(client, org, repo_name, issue_title) -> Optional[i
             pass
     return None
 
-async def edit_issue_async( client, url, issue_number, requst_body):
+
+async def edit_issue_async(client, url, issue_number, requst_body):
     res = await client.patch(url, json=requst_body)
     if res.status_code != 200:
         print(f'failed on editing issue: {url}')
@@ -166,6 +172,7 @@ async def edit_issue_async( client, url, issue_number, requst_body):
             print(f"{res.json()['errors'][0]['message']}")
         except:
             pass
+
 
 async def create_issue_async(client, url, request_body):
     res = await client.post(url, json=request_body)
