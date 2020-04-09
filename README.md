@@ -230,8 +230,10 @@ Compare the last publish-time of specific git commit in each repository and prin
 #### Format
 
 ```sh
-invisible-hand event-times [repo-hash] [--deadline="yyyy-mm-dd"]
+invisible-hand event-times <input_file> [--deadline="yyyy-mm-dd"]
 ```
+
+__input-file__: file contains list of `repo-hash`.
 
 __repo-hash__ : in the format of `<repo>:<git commit hash>`, (for example: hw0-ianre657:cb75e99)
 
@@ -246,7 +248,7 @@ __`--target-team`__ (optional): teams to operate on (use team-slug)
 #### Example
 
 ```sh
-invisible-hand event-times hw0-ianre657:cb75e99 hw0-cmprfk1:f28fbda --target-team="2020-inservice-students" --deadline="2019-11-12 23:59:59"
+invisible-hand event-times  --target-team="2020-inservice-students" --deadline="2019-11-12 23:59:59"  hw1-handin-0408.txt
 ```
 
 #### Demo (need to be updated)

@@ -9,6 +9,7 @@ from pprint import pprint
 from datetime import datetime, timedelta
 import re
 import sys
+from pathlib import Path
 from typing import List, NamedTuple, Tuple
 
 from halo import Halo
@@ -44,31 +45,33 @@ class GitHubRepoInfo(NamedTuple):
 
 # python3 github_event_times.py hw0-ianre657:cb75e99
 @click.command()
-@click.argument('repo-hashes', nargs=-1)
+@click.argument('input-file')
 @click.option('--token', default=config_github['personal_access_token'], help="github access token")
 @click.option('--org', default=config_github['organization'], show_default=True)
 @click.option('--deadline', default=config_event_times['deadline'], show_default=True,
               help='deadline format: "yyyy-mm-dd" or any ISO8601 format string (timezone will be set to local timezone)')
 @click.option('--target-team', default=None, help="specific team to operate on")
-def event_times(repo_hashes, org, token, deadline, target_team):
+def event_times(input_file, org, token, deadline, target_team):
     '''
-    repo-hashes : list of <repo>:<hash> strings
-        ex:
-            hw0-ianre657:cb75e99 hw0-jjxs:assxw12
+    input-file: file contains list of repo-hash.
+
+    repo-hash : string in <repo>:<hash> format
+            hw0-ianre657:cb75e99
     '''
     global github_organization
     global github_token
 
+    try:
+        parsed_repos = get_repo_infos(input_file)
+    except FileNotFoundError as e:
+        print(str(e))
+        return
+
     colorama_init(autoreset=True)
     spinner = Halo(stream=sys.stderr)
 
-    github_repos = repo_hashes
     github_organization = org
     github_token = token
-
-    if len(repo_hashes) == 0:
-        print('require repo-hashes')
-        return 1
 
     print(f'deadline: {deadline}')
 
@@ -76,7 +79,6 @@ def event_times(repo_hashes, org, token, deadline, target_team):
     submit_deadline = submit_deadline.replace(tzinfo=LOCAL_TIMEZONE)
 
     spinner.info(f"Deadline : {submit_deadline}")
-    parsed_repos = parse_repos_string(github_repos)
     success_group = []
     fail_group = []
     spinner.start("Start to check late submissions")
@@ -89,8 +91,8 @@ def event_times(repo_hashes, org, token, deadline, target_team):
         #print("get commit time for {}".format(repo))
         if target_team is not None:
             import re
-            user_id = re.sub('hw.+-', '', repo.name )
-            print(f'user_id :{user_id}')
+            user_id = re.sub('hw[\d]+-', '', repo.name )
+            # print(f'user_id :{user_id}')
             if user_id not in only_team_members:
                 continue
         spinner.text = f"({idx}/{len(parsed_repos)}) Checking {repo.name}"
@@ -117,10 +119,11 @@ def event_times(repo_hashes, org, token, deadline, target_team):
     print(f'Submission Deadline: {submit_deadline}')
     print(tabulate(fail_group, headers="keys"))
 
-
-def parse_repos_string(repos: List[str]) -> List[GitHubRepoInfo]:
+def get_repo_infos( filename: str ) -> List[GitHubRepoInfo]:
+    st = Path(filename).read_text()
+    infos = st.split()
     result = []
-    for r in repos:
+    for r in infos:
         repo, commit_hash = r.split(":")
         result.append(GitHubRepoInfo(repo, commit_hash))
     return result
@@ -151,7 +154,7 @@ def getRepoCommitTime(org: str, repo: str, commit_hash: str) -> List[commitInfo]
                 commit_hash = target_commit['sha'][0:7]
 
                 result = commitInfo(commit_hash, date, commit_message, repo)
-                #result_str = "{} sha:{}, msg:{}, date:{}".format(github_id, commit_hash, commit_message, date)
+                # result_str = "{} sha:{}, msg:{}, date:{}".format(github_id, commit_hash, commit_message, date)
                 msgs.append(result)
         except KeyError:
             print("Error: malformed event!")

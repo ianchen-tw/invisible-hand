@@ -53,12 +53,13 @@ BaseURL = "https://classroom.github.com"
 
 @click.command()
 @click.argument('hw_title')
+@click.argument('output')
 @click.option('--login', default=config_crawl_classroom['login'], show_default=True)
 @click.option('--passwd')
 @click.option('--classroom_id', default=config_crawl_classroom['classroom_id'], show_default=True)
-@click.option('-o', '--output', help="filename to output your result")
 def crawl_classroom(hw_title, login, passwd, classroom_id, output):
     '''Get student homework submitted version from github classroom
+        @output :filename to output your result
     '''
     spinner.start()
     if output is not None:
