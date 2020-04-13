@@ -105,7 +105,11 @@ def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
                 'title': feedback_title,
                 'body': fb['value']
             }
-            issue_num = await find_existing_issue(client, org, fb['repo_name'], feedback_title)
+            try:
+                issue_num = await find_existing_issue(client, org, fb['repo_name'], feedback_title)
+            except BaseException as e:
+                print(f'error on {fb["repo_name"]}')
+                return
             if issue_num:
                 request_body['state'] = 'open'  # reopen issue
                 url = f"https://api.github.com/repos/{org}/{fb['repo_name']}/issues/{issue_num}"
@@ -113,6 +117,7 @@ def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
             else:
                 url = f"https://api.github.com/repos/{org}/{fb['repo_name']}/issues"
                 await create_issue_async(client, url, request_body)
+            print(f'success {fb["repo_name"]}')
         async with trio.open_nursery() as nursery:
             for fb in feedbacks:
                 nursery.start_soon(push_feedback, fb)
