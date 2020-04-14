@@ -47,6 +47,7 @@ class Gstudents:
         '''Fetch a single students info, will traverse the entire table
             Use get_students manually if you need to get each student's info
         '''
+        # TODO: check id collision
         students = self.get_students()
         for s in students:
             if student_id == s['student_id']:
@@ -54,6 +55,7 @@ class Gstudents:
         return None
 
     def left_join(self, right_sheet_title) -> List[Dict[str, str]]:
+        # TODO: check id collision
         left_dicts = self.get_students()
         right_dicts = get_all_record(
             self.sht.worksheet_by_title(right_sheet_title))
