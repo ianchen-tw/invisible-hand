@@ -93,19 +93,17 @@ def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
 
     # handle only_id
     if only_id:
-        info = gstudents.get_student(only_id)
+        try:
+            # detect possible buggy condition
+            info = gstudents.get_student(only_id)
+        except RuntimeError as e:
+            print(' *='*30)
+            print('Warning!')
+            print(e)
+            return
         only_repo_name = get_hw_repo_name(
             homework_prefix, info['github_handle'])
         fbs = list(filter(lambda fb: fb['repo_name'] == only_repo_name, fbs))
-
-        # detect possible buggy condition
-        if len(fbs) > 1:
-            def show_info(fb):
-                return f"[{fb['github_handle']}, {fb['student_id']}]"
-            for f in fbs:
-                print(' *='*30)
-                print('Warning!')
-                print(f'Detect information collision inside student :{show_info(f)}')
 
     async def push_to_remote(feedback_title, feedbacks):
         # push to remote
