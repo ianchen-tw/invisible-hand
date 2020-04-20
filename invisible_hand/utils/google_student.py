@@ -89,10 +89,3 @@ class Gstudents:
             student = {**left, **right}
             joined_infos.append(student)
         return joined_infos
-
-if __name__ == "__main__":
-    url = "https://docs.google.com/spreadsheets/d/1WlbKDBdhC03m_mFikWwwveDvSQKwKKo20SO9KlbeSqQ/edit?ouid=109372349474156491416&usp=sheets_home"
-    student = Gstudents(url)
-    for i in student.left_join("hw1"):
-        print(i)
-        print("-"*20)
