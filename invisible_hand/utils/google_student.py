@@ -41,8 +41,8 @@ class pygsheetInteractor:
         return vals
 
 class Gstudents:
-    def __init__(self, url=config_gsheet['spreadsheet_url'], actor=pygsheetInteractor()):
-        self.actor = actor
+    def __init__(self, url=config_gsheet['spreadsheet_url'], actor=None):
+        self.actor = actor if actor is not None else pygsheetInteractor()
         self.actor.open_by_url(url)
 
         self.config = {
