@@ -202,6 +202,15 @@ invisible-hand crawl-classroom --passwd=(cat ~/cred/mypass) -o hw5_handin.txt hw
 
 Users should type their passsword inside the pop-up window if they don't provide their password in the argument
 
+#### FAQ
+
++ ChromeDriver
+  ```
+  selenium.common.exceptions.SessionNotCreatedException: Message: session not created: This version of ChromeDriver only supports Chrome version 79
+  ```
+  upgrade your chromedriver via `brew cask upgrade chromedriver`
+
+
 #### Demo
 
 <img src="./demos/github_classroom_craw.gif" alt="github_classroom_craw" width="640">
