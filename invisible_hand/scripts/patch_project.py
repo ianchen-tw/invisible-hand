@@ -65,7 +65,7 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo):
     )
     issue_tmpl_found = False
     for i in issues:
-        if i['title'] == patch_branch:
+        if i['title'].strip() == patch_branch.strip():
             issue_tmpl_found = True
             issue_tmpl_body = i['body']
             break

@@ -1,6 +1,6 @@
 # Invisible Hand
 
-Invisible Hand is a set of tools to manage your classroom inside github organization. It utilize `Google Sheets`, `Github Classroom` and `Github` seamlessly.
+Invisible Hand is a set of tools to manage your classroom inside github organization. It utilizes `Google Sheets`, `GitHub Classroom` and `GitHub` seamlessly.
 
 ## Installation
 
@@ -8,9 +8,9 @@ Install dependencies by using `pipenv install && pipenv install -e .` and `brew 
 
 ## Config Files
 
-__Invisible Hand__ operate on 2 config files : `github_config.ini` and `gsheet_config.ini`.
+__Invisible Hand__ operates on 2 config files: `github_config.ini` and `gsheet_config.ini`.
 
-Call `invisible-hand` will automatically propagate these files into working directory.
+Calling `invisible-hand` will automatically propagate these files into working directory with default template. Make sure you have configured them correctly before using them.
 
 Additionally, if you want to use [`Announce Grade`](#announce-grade), follow [here](https://pygsheets.readthedocs.io/en/stable/authorization.html) to get your client secret file and rename it to __client_secret.json__
 
@@ -124,10 +124,18 @@ Patch to student homework repositories.
 
 <details><summary><b>Show Detail Information</b></summary>
 
+#### Config File
+
++ __github_config.ini__:
+  + `[github]:personal_access_token`
+  + `[github]:organization`
++ __gsheet_config.ini__
+  + `[google_spreadsheet]:spreadsheet_url`
+
 #### Format
 
 ```sh
-invisible-hand patch-project <hw_title> [--only-repo]
+invisible-hand patch-project <hw_title> [--only-repo] <patch_branch>
 ```
 
 > Use `-h` to see more detailed information about this command.
@@ -140,26 +148,26 @@ take homework : __`hw3`__(the title of your homework in github classroom) for ex
 
 1. The repo __`tmpl-hw3`__ would be your template for initializing homeworks.
 2. Create another repo to update your template, let's say: __`tmpl-hw3-revise`__
-3. inside __`tmpl-hw3-revise`__, create a revision branch __`1-add-some-new-feature`__ (whatever you like) and an issuse named match your branch name (in this example, __`1-add-some-new-feature`)__, which will be the content of your PR message.
+3. Inside __`tmpl-hw3-revise`__, create a revision branch __`1-add-some-new-feature`__ (whatever you like) and an issuse named as the branch name (in this example, __`1-add-some-new-feature`)__, which will be the content of your PR message.
 4. Open github-classroom, choose your assignment (__`hw3`__) and disable `assignment invitation URL` of __`hw3`__.
-5. Create PR to your template repo(__`hw3`__) by using this command.(your need to edit the `patch_branch` variable in `github_project_patcher.py`)
+5. Create an PR to your template repo (__`hw3`__) by using this command.
 
     ```sh
-    invisible-hand patch-project hw3 --only-repo="tmpl-hw3"
+    invisible-hand patch-project hw3 --only-repo="tmpl-hw3" 1-add-some-new-feature
     ```
 
-6. Accept the PR in your template repository (__`tmpl-hw3`__). After that, enable the `assignment invitation URL` under `hw3` in Github Classroom. Now you have succcessfully updated your template repo.
-7. Create PRs to students template repositories (`hw3-<thir github id>`) by running the scirpt as followed.
+6. Accept the PR in your template repository (__`tmpl-hw3`__). After that, enable the `assignment invitation URL` of `hw3` in GitHub Classroom. Now you have succcessfully updated your template repo.
+7. Create PRs to students template repositories (`hw3-<their github id>`) by running the scirpt as followed.
 
     ```sh
-    invisible-hand patch-project hw3
+    invisible-hand patch-project hw3 1-add-some-new-feature
     ```
 
-    This script would patch to every repositories under your github organization which's name contains __`hw3`__ as prefix.
+    This script would patch to every repository that uses __hw3__ as the prefix under your GitHub organization.
 
 8. Merge the revision brnach __`1-add-some-new-feature`__ into `master`  in your __`tmpl-hw3-revise`__ repo. After this step, all documents are updated.
 
-#### Demo
+#### Demo (Deprecated)
 
 <img src="./demos/patcher.gif" alt="patcher-demo-video" width="640">
 
