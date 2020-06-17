@@ -14,7 +14,7 @@ from .scripts.grant_read_access import grant_read_access
 @click.group(invoke_without_command=True, context_settings=dict(help_option_names=["-h", "--help"]))
 @click.pass_context
 def cli(ctx):
-    '''Toolkits for compiler-f19
+    '''Toolkits for github courses
     '''
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())

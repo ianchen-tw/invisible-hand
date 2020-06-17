@@ -4,7 +4,24 @@ Invisible Hand is a set of tools to manage your classroom inside github organiza
 
 ## Installation
 
-Install dependencies by using `pipenv install && pipenv install -e .` and `brew cask install chromedriver`.
+#### 1. Install pyenv and pipenv
+
+`./onboarding.sh`
+
+#### 2. Install chromedriver
+
++ OSX
+
+  `brew cask install chromedriver`
+
++ Ubuntu
+
+  `apt install chromium-chromedriver`
+
+#### 3. Get into virtual environment
+
+`pipenv shell`
+
 
 ## Config Files
 
