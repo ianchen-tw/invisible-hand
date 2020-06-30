@@ -211,7 +211,7 @@ This is a web crawler for Github Classroom, which is the input of [`Event Times`
 #### Format
 
 ```sh
-invisible-hadn crawl-classroom <hw_title> [--passwd] [-o --output]
+invisible-hand crawl-classroom [OPTIONS] HW_TITLE OUTPUT
 ```
 
 > Use `-h` to see more detailed information about this command
@@ -220,7 +220,7 @@ invisible-hadn crawl-classroom <hw_title> [--passwd] [-o --output]
 #### Example
 
 ```shell
-invisible-hand crawl-classroom --passwd=(cat ~/cred/mypass) -o hw5_handin.txt hw5
+invisible-hand crawl-classroom --passwd=(cat ~/cred/mypass) hw5 hw5_handle.txt
 ```
 
 > This example suppose you use Fish Shell and store your password inside `~/cred/mypass`
@@ -234,7 +234,8 @@ Users should type their passsword inside the pop-up window if they don't provide
   selenium.common.exceptions.SessionNotCreatedException: Message: session not created: This version of ChromeDriver only supports Chrome version 79
   ```
   upgrade your chromedriver via `brew cask upgrade chromedriver`
-
++ All students not submitted
+  + Remember to set deadline of hw on the GitHub classroom (note that deadline can only be set at a future time)
 
 #### Demo
 
