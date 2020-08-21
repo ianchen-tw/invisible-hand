@@ -13,6 +13,8 @@ from ..config.github import config_github, config_grant_read_access
 
 # Use a "team slug"
 # for example: "2019 Teaching-team" -> "2019_teaching-team"
+
+
 @click.command()
 @click.argument('hw_title')
 @click.option('--token', default=config_github['personal_access_token'], help="github access token")
@@ -28,19 +30,19 @@ def grant_read_access(hw_title, token, org, team):
                                  github_repo_prefix=f'{hw_title}-',
                                  github_token=token,
                                  verbose=True)
-    repo_names = [ r['name'] for r in repos ]
+    repo_names = [r['name'] for r in repos]
 
     # show repos to operate on
     ncols = 3
-    cols = [ repo_names[i::ncols] for i in range(ncols)]
+    cols = [repo_names[i::ncols] for i in range(ncols)]
     print('repos to operate on:')
-    for a,b,c in zip(*cols):
+    for a, b, c in zip(*cols):
         print(f'  {a:<30}{b:<30}{c:<}')
 
     builder = pbar_builder()
     builder.set_config(total=len(repo_names))
     with builder.build(desc='fired') as fired, builder.build(desc='returned') as returned:
-        async def subscribe_to_repo(team:Team, repo_name:str):
+        async def subscribe_to_repo(team: Team, repo_name: str):
             res = await team.add_team_repository_async(repo_name, permission="pull")
             if res.status_code != 204:
                 print(res)
@@ -49,30 +51,34 @@ def grant_read_access(hw_title, token, org, team):
         async def async_github():
             async with trio.open_nursery() as nursery:
                 for repo_name in repo_names:
-                    nursery.start_soon(subscribe_to_repo, teaching_team, repo_name)
+                    nursery.start_soon(subscribe_to_repo,
+                                       teaching_team, repo_name)
                     fired.update(1)
                     fired.refresh()
                 return
         trio.run(async_github)
 
+
 class pbar_builder():
     def __cover_dict(self, src, dst):
-        for k,v in src.items():
+        for k, v in src.items():
             dst[k] = v
+
     def __init__(self):
         self.config = {}
         self.next_po = 0
 
-    def set_config(self,**kwargs):
+    def set_config(self, **kwargs):
         self.__cover_dict(kwargs, self.config)
 
     def build(self, **kwargs):
         cfg = {}
         self.__cover_dict(self.config, cfg)
-        self.__cover_dict(kwargs, cfg )
+        self.__cover_dict(kwargs, cfg)
         cfg['position'] = self.next_po
         self.next_po += 1
         return tqdm(**cfg)
+
 
 if __name__ == "__main__":
     grant_read_access()
