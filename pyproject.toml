@@ -1,0 +1,50 @@
+[tool.poetry]
+name = "invisible-hand"
+version = "0.2.1"
+description = "Automate your workflow with github classroom"
+authors = ["Ian Chen <ianre657@gmail.com>"]
+readme = "README.md"
+exclude = ["tests"]
+
+packages = [
+    { include = "invisible_hand"},
+]
+
+
+[tool.poetry.scripts]
+hand = "invisible_hand.cli:main"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+selenium = "^3.141.0"
+pandas = "^1.1.1"
+beautifulsoup4 = "^4.9.1"
+lxml = "^4.5.2"
+ipython = "^7.17.0"
+colorama = "^0.4.3"
+halo = "^0.0.30"
+gitpython = "^3.1.7"
+requests = "^2.24.0"
+iso8601 = "^0.1.12"
+google-api-python-client = "^1.10.0"
+google-auth-httplib2 = "^0.0.4"
+google-auth-oauthlib = "^0.4.1"
+tabulate = "^0.8.7"
+click = "^7.1.2"
+prompt-toolkit = "^3.0.6"
+xlsxwriter = "^1.3.3"
+pygsheets = "^2.0.3"
+trio = "^0.16.0"
+tqdm = "^4.48.2"
+httpx = "^0.14.1"
+oauth2client = "^4.1.3"
+
+[tool.poetry.dev-dependencies]
+pylint = "^2.5.3"
+autopep8 = "^1.5.4"
+pytest = "^6.0.1"
+pytest-cov = "^2.10.1"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
