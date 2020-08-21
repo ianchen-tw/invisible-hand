@@ -27,9 +27,7 @@ Additionally, if you want to use [ `Announce Grade` ](#announce-grade), follow [
 
 ## Usage
 
-To use the scripts below, **you need to activate your python environment by using `pipenv shell` first.**
-
-### Invisible Hand
+### hand
 
 The root command
 
