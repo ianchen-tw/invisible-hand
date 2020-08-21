@@ -313,37 +313,34 @@ Lets say you're about to announce the grade for `hw3` :
 * prequisite:
   1. a git repo to store student feedback templates, which strutured as followed:
 
-    
-
 ``` bash
-        . Hw-manager # root of your git repo
-        ├── hw3
-        │   └── reports
-        │       ├── 0411276.md
-        │       ├── 0856039.md
-        │       └── 0956323.md
-        └── hw4 # other homework dir
-    ```
+  . Hw-manager # root of your git repo
+  ├── hw3
+  │   └── reports
+  │       ├── 0411276.md
+  │       ├── 0856039.md
+  │       └── 0956323.md
+  └── hw4 # other homework dir
+```
 
-    and inside `0411276.md` , it would be:
-    
+and inside `0411276.md` , it would be:
 
 ``` markdown
-        # Information
+  # Information
 
-        + Student Id: ${student_id}
-        + Grade : ${grade}
+  + Student Id: ${student_id}
+  + Grade : ${grade}
 
-        # <Some other important things...>
-        ...
-    ```
+  # <Some other important things...>
+  ...
+```
 
   2. a google sheet to store student information
 
-        | student_id | grade |
-        | :--------: | :---: |
-        |  0856039   |  93   |
-        |  0411276   |  80   |
+    | student_id | grade |
+    | :--------: | :---: |
+    |  0856039   |  93   |
+    |  0411276   |  80   |
 
 #### Config file
 
