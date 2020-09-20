@@ -5,7 +5,6 @@ from tqdm import tqdm
 
 from typing import List
 
-from colorama import Fore, Back, Style
 from ..utils.github_scanner import query_matching_repos
 from ..utils.github_entities import Team
 from ..utils.github_api import ensure_gh_token

@@ -14,11 +14,11 @@ from functools import wraps
 from time import time
 
 import click
-from colorama import Fore, Back, Style
 from halo import Halo
 
 from ..config.github import config_github, config_announce_grade
 
+from ..core.color_text import normal
 from ..utils.github_api import ensure_gh_token
 from ..utils.github_scanner import get_github_endpoint_paged_list_async
 from ..utils.google_student import Gstudents
@@ -67,7 +67,7 @@ def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
     root_folder = Path(tempfile.mkdtemp(
         prefix="feedback-tmp-{}-".format(datetime.now().strftime("%b%d%H%M%S")), dir="."))
     spinner.succeed(
-        f"Create tmp folder {Fore.YELLOW}{root_folder}{Style.RESET_ALL}")
+        normal.txt('Create tmp folder ').kw(root_folder).to_str())
 
     feedback_repo_path = root_folder / 'feedbacks'
 
