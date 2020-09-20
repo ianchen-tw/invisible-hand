@@ -1,14 +1,14 @@
 import click
+from six import ensure_binary
 import trio
 from tqdm import tqdm
 
 from typing import List
 
-from colorama import init as colorama_init
 from colorama import Fore, Back, Style
 from ..utils.github_scanner import query_matching_repos
 from ..utils.github_entities import Team
-
+from ..utils.github_api import ensure_gh_token
 from ..config.github import config_github, config_grant_read_access
 
 # Use a "team slug"
@@ -23,7 +23,9 @@ from ..config.github import config_github, config_grant_read_access
 def grant_read_access(hw_title, token, org, team):
     '''Grant read access right of TA's group to students' homework repo'''
     print("start script")
-    colorama_init()
+
+    ensure_gh_token(token)
+
     teaching_team = Team(org, team, token)
 
     repos = query_matching_repos(org,

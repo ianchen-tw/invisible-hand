@@ -13,13 +13,11 @@ from git import Repo, IndexFile
 from git.objects.commit import Commit
 
 from halo import Halo
-from colorama import init as colorama_init
 from colorama import Fore, Back, Style
 
-
+from ..utils.github_api import ensure_gh_token
 from ..utils.github_scanner import query_matching_repos, github_headers, get_github_endpoint_paged_list, query_matching_repos
 from ..config.github import config_github
-
 
 
 # The Pull request we made would fetch the first issue which has the same title
@@ -35,8 +33,8 @@ from ..config.github import config_github
 @click.option('--only-repo', nargs=1, help="only repo to patch")
 def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo):
     '''Patch to student homeworks'''
+    ensure_gh_token(token)
     # init
-    colorama_init(autoreset=True)
     spinner = Halo(stream=sys.stderr)
 
     if source_repo == '':
@@ -47,7 +45,8 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo):
     res = requests.get(
         f"https://api.github.com/repos/{org}/{source_repo}/git/refs/heads/{patch_branch}", headers=github_headers(token))
     if res.status_code != 200:  # this branch not exists on the remote
-        spinner.fail(f"branch : `{patch_branch}` doesn't exist on repo:{org}/{source_repo} ")
+        spinner.fail(
+            f"branch : `{patch_branch}` doesn't exist on repo:{org}/{source_repo} ")
         return
 
     cur = Path('.')

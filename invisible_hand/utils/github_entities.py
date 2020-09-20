@@ -8,15 +8,16 @@ from typing import List
 
 from requests.models import Response
 
-from colorama import init as colorama_init
 from colorama import Fore, Back, Style
 from halo import Halo
 
 from ..config.github import config_github
 from .github_scanner import get_github_endpoint, github_headers, get_github_endpoint_paged_list
 
+
 def main():
-    print ("nothin to run")
+    print("nothin to run")
+
 
 class Team:
     def __init__(self, org, team_slug="", github_token=""):
@@ -27,8 +28,6 @@ class Team:
         self.members = dict()
         self.github_token = github_token
         self._get_members()
-        colorama_init()
-
 
         # async
         self.httpx_headers = httpx.Headers({
@@ -119,7 +118,6 @@ class Team:
             print("    team_slug: {}".format(self.team_slug))
             sys.exit(1)
         self.id = result['id']
-
 
 
 if __name__ == "__main__":
