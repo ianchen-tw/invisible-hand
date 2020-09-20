@@ -9,7 +9,7 @@ from ..core.color_text import normal, warn
 from ..config.github import config_github, config_add_students
 from ..utils.github_scanner import github_headers
 from ..utils.github_entities import Team
-from ..utils.github_api import ensure_gh_token
+from ..utils import ensure_gh_token
 
 
 def print_table(data, cols=5, wide=15, indent=2):
