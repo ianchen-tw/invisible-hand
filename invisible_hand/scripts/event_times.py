@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import List, NamedTuple, Tuple
 
 from halo import Halo
-from colorama import init as colorama_init
 from colorama import Fore, Back, Style
 from tabulate import tabulate
 
@@ -22,6 +21,7 @@ from ..config.github import config_github, config_event_times
 from ..utils.github_scanner import LOCAL_TIMEZONE
 from ..utils.github_scanner import *
 from ..utils.github_entities import Team
+from ..utils.github_api import ensure_gh_token
 
 
 def is_deadline_passed(dl: datetime, submit: datetime) -> Tuple[bool, timedelta]:
@@ -44,6 +44,8 @@ class GitHubRepoInfo(NamedTuple):
     commit_hash: str  # 7 characters hash value
 
 # python3 github_event_times.py hw0-ianre657:cb75e99
+
+
 @click.command()
 @click.argument('input-file')
 @click.option('--token', default=config_github['personal_access_token'], help="github access token")
@@ -66,8 +68,7 @@ def event_times(input_file, org, token, deadline, target_team):
     except FileNotFoundError as e:
         print(str(e))
         return
-
-    colorama_init(autoreset=True)
+    ensure_gh_token(token)
     spinner = Halo(stream=sys.stderr)
 
     github_organization = org
@@ -85,13 +86,14 @@ def event_times(input_file, org, token, deadline, target_team):
 
     # get team membershup info
     if target_team is not None:
-        only_team_members = set(Team(org=github_organization, team_slug=target_team, github_token=github_token).members.keys())
+        only_team_members = set(Team(
+            org=github_organization, team_slug=target_team, github_token=github_token).members.keys())
 
     for idx, repo in enumerate(parsed_repos, start=1):
         #print("get commit time for {}".format(repo))
         if target_team is not None:
             import re
-            user_id = re.sub('hw[\d]+-', '', repo.name )
+            user_id = re.sub('hw[\d]+-', '', repo.name)
             # print(f'user_id :{user_id}')
             if user_id not in only_team_members:
                 continue
@@ -119,7 +121,8 @@ def event_times(input_file, org, token, deadline, target_team):
     print(f'Submission Deadline: {submit_deadline}')
     print(tabulate(fail_group, headers="keys"))
 
-def get_repo_infos( filename: str ) -> List[GitHubRepoInfo]:
+
+def get_repo_infos(filename: str) -> List[GitHubRepoInfo]:
     st = Path(filename).read_text()
     infos = st.split()
     result = []
@@ -131,7 +134,8 @@ def get_repo_infos( filename: str ) -> List[GitHubRepoInfo]:
 
 def getRepoCommitTime(org: str, repo: str, commit_hash: str) -> List[commitInfo]:
     global github_token
-    response = get_github_endpoint_paged_list(f"repos/{org}/{repo}/events", github_token, verbose=False)
+    response = get_github_endpoint_paged_list(
+        f"repos/{org}/{repo}/events", github_token, verbose=False)
     event_list = [x for x in response if x['type'] == 'PushEvent']
     # find the localtiome of the given commit SHA that is pushed.
     msgs = []

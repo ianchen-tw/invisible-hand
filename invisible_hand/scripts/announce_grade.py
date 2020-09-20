@@ -3,7 +3,6 @@ import shutil
 import tempfile
 import subprocess as sp
 import string
-import requests
 
 import httpx
 import trio
@@ -11,17 +10,17 @@ import trio
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Optional
-from functools import partial, wraps
+from functools import wraps
 from time import time
 
 import click
-from colorama import init as colorama_init
 from colorama import Fore, Back, Style
 from halo import Halo
 
 from ..config.github import config_github, config_announce_grade
 
-from ..utils.github_scanner import github_headers, get_github_endpoint_paged_list_async
+from ..utils.github_api import ensure_gh_token
+from ..utils.github_scanner import get_github_endpoint_paged_list_async
 from ..utils.google_student import Gstudents
 
 
@@ -49,8 +48,8 @@ def measure_time(f):
 def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
     '''announce student grades to each hw repo'''
 
+    ensure_gh_token(token)
     # TODO: use logging lib to log messages
-    colorama_init()
     spinner = Halo(stream=sys.stderr)
 
     student_feedback_title = f"Grade for {homework_prefix}"

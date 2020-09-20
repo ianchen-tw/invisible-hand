@@ -1,17 +1,16 @@
 import click
-import sys
 from typing import List, Dict
 
 import requests
-from requests.models import Response
 
-from colorama import init as colorama_init
-from colorama import Fore, Back, Style
+from colorama import Fore, Back
 from halo import Halo
 
+from ..core.color_text import warn
 from ..config.github import config_github, config_add_students
-from ..utils.github_scanner import get_github_endpoint, github_headers
+from ..utils.github_scanner import github_headers
 from ..utils.github_entities import Team
+from ..utils.github_api import ensure_gh_token
 
 
 def print_table(data, cols=5, wide=15, indent=2):
@@ -43,20 +42,14 @@ def add_students(student_handles, token, org, team):
     if len(student_handles) == 0:
         print(f'required handles')
         return 1
-    colorama_init()
 
     github_students = student_handles
     github_organization = org
     github_team = team
     github_token = token
 
-    if github_token == "":
-        print(Back.RED + Fore.BLACK +
-              "No github_token is given, use "
-              + Fore.WHITE + "cmd_argument" + Fore.BLACK
-              + " or sepcify it in "
-              + Fore.WHITE + "github_congif.py "
-              + Back.RESET + Fore.RESET)
+    ensure_gh_token(github_token)
+
     #print('org: {}'.format(github_organization))
     #print('token: {}'.format(github_token))
     # print("students:{}".format(github_students))
