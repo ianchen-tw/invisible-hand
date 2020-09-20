@@ -20,7 +20,7 @@ from ..config.github import config_github, config_event_times
 from ..utils.github_scanner import LOCAL_TIMEZONE
 from ..utils.github_scanner import *
 from ..utils.github_entities import Team
-from ..utils.github_api import ensure_gh_token
+from ..utils import ensure_gh_token
 
 
 def is_deadline_passed(dl: datetime, submit: datetime) -> Tuple[bool, timedelta]:

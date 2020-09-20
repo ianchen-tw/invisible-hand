@@ -16,7 +16,7 @@ from halo import Halo
 from requests.api import patch
 
 from ..core.color_text import normal, warn
-from ..utils.github_api import ensure_gh_token
+from ..utils import ensure_gh_token
 from ..utils.github_scanner import query_matching_repos, github_headers, get_github_endpoint_paged_list, query_matching_repos
 from ..config.github import config_github
 
