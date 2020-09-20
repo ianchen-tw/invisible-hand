@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import List, NamedTuple, Tuple
 
 from halo import Halo
-from colorama import Fore, Back, Style
 from tabulate import tabulate
 
 from ..config.github import config_github, config_event_times

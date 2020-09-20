@@ -13,8 +13,9 @@ from git import Repo, IndexFile
 from git.objects.commit import Commit
 
 from halo import Halo
-from colorama import Fore, Back, Style
+from requests.api import patch
 
+from ..core.color_text import normal, warn
 from ..utils.github_api import ensure_gh_token
 from ..utils.github_scanner import query_matching_repos, github_headers, get_github_endpoint_paged_list, query_matching_repos
 from ..config.github import config_github
@@ -55,7 +56,7 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo):
     spinner.info("delete dated folder")
 
     spinner.start(
-        f"Fetch issue template {Fore.CYAN}{patch_branch} {Fore.RESET}from {Fore.CYAN}{source_repo}")
+        normal.txt('Fetch issue template').kw(patch_branch).txt(' from ').kw(source_repo).to_str())
     # Fetch patch template on the source repo
     issues = get_github_endpoint_paged_list(
         endpoint=f"repos/{org}/{source_repo}/issues",
@@ -75,10 +76,10 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo):
 
     root_folder = Path(tempfile.mkdtemp(
         prefix="patch-{}-{}-".format(patch_branch, datetime.now().strftime("%b%d%H%M%S")), dir="."))
-    spinner.succeed(f"Create tmp folder {Fore.YELLOW}{root_folder}")
 
-    spinner.info(
-        f"Fetch source repo {Fore.CYAN}{source_repo}{Style.RESET_ALL} from GitHub")
+    spinner.succeed(normal.txt('Create tmp folder ').kw(root_folder).to_str())
+    spinner.info(normal.txt('Fetch soure repo').kw(
+        source_repo).txt(' from GitHub ').to_str())
     src_repo_path = root_folder / "source_repo"
     sp.run(['git', 'clone',
             f'https://github.com/{org}/{source_repo}.git', src_repo_path.name, ], cwd=root_folder)
@@ -105,8 +106,8 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo):
                                                    verbose=False) if re['name'] == only_repo]
         repo = next(iter(repos), None)
         if repo:
-            spinner.info(
-                f"Only patch to repo : {Fore.YELLOW}{repo['name']}{Style.RESET_ALL}")
+            spinner.info(normal.txt("Only patch to repo : ").kw(
+                repo['name']).to_str())
         repos = [repo]
     else:
         repos = query_matching_repos(org,
@@ -119,7 +120,8 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo):
     student_path = root_folder / "student_repos"
     student_path.mkdir()
     for repo_idx, r in enumerate(repos, start=1):
-        pre_prompt_str = f"({repo_idx}/{len(repos)}) {Fore.YELLOW}{r['name']}{Fore.RESET}"
+        pre_prompt_str = normal.txt(
+            f'({repo_idx}/{len(repos)})').kw(f" {r['name']} ").to_str()
         spinner.start()
 
         # Check if repo already contains the patched branch. Skip if so.
@@ -128,12 +130,12 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo):
             f"https://api.github.com/repos/{org}/{r['name']}/git/refs/heads/{patch_branch}", headers=github_headers(token))
         if res.status_code == 200:  # this branch exists in the remote
             spinner.text = pre_prompt_str + \
-                f" {Back.GREEN}{Fore.BLACK} Skip {Style.RESET_ALL} already patched"
+                normal.kw("  Skip  ").txt("already patched ").to_str()
             spinner.succeed()
             continue
 
         spinner.text = pre_prompt_str + \
-            f" {Fore.BLUE}cloning repo..{Fore.RESET}"
+            normal.txt(' cloning repo...').to_str()
         sp.run(['git', 'clone', '--depth=1', r['html_url']],
                cwd=student_path, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
 
@@ -163,7 +165,7 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo):
         student_repo = Repo(student_path/hw_repo_name)
         if len(student_repo.index.diff("HEAD")) == 0:
             spinner.text = pre_prompt_str + \
-                f" {Back.GREEN}{Fore.BLACK} Passed {Style.RESET_ALL} Repo no change"
+                normal.kw2("  Passed  ").txt("Repo no change").to_str()
             spinner.succeed()
             continue
 
@@ -172,12 +174,12 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo):
                stdout=sp.DEVNULL, stderr=sp.DEVNULL)
 
         spinner.text = pre_prompt_str + \
-            f" {Fore.BLUE}publish patch to remote..{Fore.RESET}"
+            normal.kw(" publish patch to remote...").to_str()
         res = sp.run(['git', 'push', '-u', 'origin', patch_branch], cwd=student_path/hw_repo_name,
                      stdout=sp.DEVNULL, stderr=sp.DEVNULL)
         if res.returncode != 0:
-            spinner.text = (pre_prompt_str + f" {Back.RED}{Fore.BLACK} Failed {Style.RESET_ALL}"
-                            + f" Cannot push branch {Fore.CYAN}{patch_branch}{Fore.RESET} to origin")
+            spinner.text = pre_prompt_str + warn.kw('  Failed  ') \
+                + warn.txt(' Cannot push branch ').kw2(patch_branch).txt(' to origin').to_str()
             spinner.fail()
             continue
 
@@ -192,15 +194,16 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo):
         res = requests.post(f"https://api.github.com/repos/{org}/{r['name']}/pulls",
                             headers=github_headers(token), json=body)
         if res.status_code == 201:
-            spinner.text = pre_prompt_str + \
-                f" {Fore.BLACK}{Back.GREEN} Patched {Style.RESET_ALL}"
+            spinner.text = pre_prompt_str + normal.txt(' Patched ').to_str()
             spinner.succeed()
         else:
-            spinner.text = (pre_prompt_str + f" {Back.RED}{Fore.BLACK} Failed {Style.RESET_ALL}"
-                            + f" Cannot create PR {Fore.CYAN}{patch_branch}{Fore.RESET} to origin/master")
+            spinner.text = pre_prompt_str + warn.kw('  Failed  ') \
+                + warn.txt('Cannot create PR').kw2(patch_branch).txt('to origin/master').to_str()
             spinner.fail()
             try:
-                print(f"    {Fore.RED}{res.json()['errors'][0]['message']}")
+                info = warn.txt('    ').txt(
+                    res.json()['errors'][0]['message']).to_str()
+                print(info)
             except:
                 pass
             continue

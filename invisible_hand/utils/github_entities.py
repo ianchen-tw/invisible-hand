@@ -8,9 +8,9 @@ from typing import List
 
 from requests.models import Response
 
-from colorama import Fore, Back, Style
 from halo import Halo
 
+from ..core.color_text import warn
 from ..config.github import config_github
 from .github_scanner import get_github_endpoint, github_headers, get_github_endpoint_paged_list
 
@@ -92,12 +92,7 @@ class Team:
                 verbose=False
             )
         except:
-            print(Back.RED + Fore.BLACK +
-                  "Cannot fetch team id"
-                  + Back.RESET + Fore.RESET)
-            print("Team info:")
-            print("    org: {}".format(self.org))
-            print("    team_slug: {}".format(self.team_slug))
+            prompt_cannot_fetch_team(org=self.org, team_slug=self.team_slug)
             sys.exit(1)
         for user in res:
             self.members[user['login']] = user
@@ -110,14 +105,16 @@ class Team:
                 config_github['personal_access_token'],
             )
         except:
-            print(Back.RED + Fore.BLACK +
-                  "Cannot fetch team id"
-                  + Back.RESET + Fore.RESET)
-            print("Team info:")
-            print("    org: {}".format(self.org))
-            print("    team_slug: {}".format(self.team_slug))
+            prompt_cannot_fetch_team(org=self.org, team_slug=self.team_slug)
             sys.exit(1)
         self.id = result['id']
+
+
+def prompt_cannot_fetch_team(org: str, team_slug: str):
+    print(warn.txt("Cannot fetch team id").to_str)
+    print("Team info:")
+    print(f"    org: {org}")
+    print(f"    team_slug: {team_slug}")
 
 
 if __name__ == "__main__":

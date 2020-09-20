@@ -3,10 +3,9 @@ from typing import List, Dict
 
 import requests
 
-from colorama import Fore, Back
 from halo import Halo
 
-from ..core.color_text import warn
+from ..core.color_text import normal, warn
 from ..config.github import config_github, config_add_students
 from ..utils.github_scanner import github_headers
 from ..utils.github_entities import Team
@@ -56,20 +55,14 @@ def add_students(student_handles, token, org, team):
 
     with Halo() as spinner:
         spinner.text = "fetch existing team members from GitHub"
-        # spinner.start()
-
         team = Team(github_organization, team_slug=github_team,
                     github_token=github_token)
         spinner.succeed()
-        dic = {
-            'team': github_team,
-            'n_mem': len(team.members.keys()),
-            'num_style': Fore.GREEN,
-            'reset_str': Back.RESET + Fore.RESET
-        }
-        spinner.info(
-            "{team} - {num_style}{n_mem}{reset_str} members".format(**dic))
-        spinner.text_color = "green"
+
+        num_member = len(team.members.keys())
+        words = normal.txt('target team: ').kw(
+            f'{github_team}').txt('( ').kw2(num_member).txt(' members) ')
+        spinner.info(words.to_str())
 
     existed_members = set(team.members.keys())
     outside_users = list(set(github_students)-existed_members)
@@ -93,7 +86,7 @@ def add_students(student_handles, token, org, team):
     if len(invalid_id) != 0:
         print("Find non-existed github user names:")
         # control strings take space
-        print_table([Fore.RED+i+Fore.RESET for i in invalid_id],
+        print_table([warn.txt(f'i').to_str() for i in invalid_id],
                     cols=5, wide=25)
 
     non_member_valid_users = list(set(outside_users) - set(invalid_id))
@@ -128,16 +121,15 @@ def add_students(student_handles, token, org, team):
     failed_users = []
     with Halo() as spinner:
         for user_name in no_memship_users:
-            spinner.text = Fore.GREEN + "adding user: " + \
-                Fore.RESET+"{}".format(user_name)
+            spinner.text = normal.txt('adding user: ').kw(user_name).to_str()
             spinner.start()
             res = team.add_user_to_team(user_name)
             if res.status_code == 200:
                 spinner.succeed()
             else:
                 failed_users.append(user_name)
-                spinner.text += ", return code: " + Fore.RED + \
-                    str(res.status_code) + Fore.RESET
+                spinner.text += warn.txt(', return code:').kw(
+                    f' {res.status_code} ').to_str()
                 spinner.fail()
     failed_users = list(set(failed_users))
 

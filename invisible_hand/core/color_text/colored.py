@@ -23,13 +23,13 @@ class ColoredText:
 
     # Define functions here to provide code completion hint
     def txt(self, s):
-        return self.__append_word(self.__get_style('txt'), s)
+        return self.__append_word(self.__get_style('txt'), str(s))
 
     def kw(self, s):
-        return self.__append_word(self.__get_style('kw'), s)
+        return self.__append_word(self.__get_style('kw'), str(s))
 
     def kw2(self, s):
-        return self.__append_word(self.__get_style('kw2'), s)
+        return self.__append_word(self.__get_style('kw2'), str(s))
 
     def newline(self):
         words = self.words.copy()
@@ -47,12 +47,26 @@ class ColoredText:
         words = [w.replace('\n', f'{Style.RESET_ALL}\n') for w in self.words]
         return ''.join(words)
 
+    def to_str(self):
+        return self.__to_str()
+
     def __repr__(self):
         return self.__to_str()
 
     def __str__(self):
         return self.__to_str()
 
+    def strip(self):
+        return self.__to_str().strip()
+
+    def __radd__(self, left):
+        # convert L.H.S. into a string
+        words = [str(left)] + self.words.copy()
+        return ColoredText(style=self.style, words=words)
+
     def __add__(self, other):
-        words = self.words.copy()+other.words.copy()
-        return ColoredText(style=other.style, words=words)
+        if isinstance(other, ColoredText):
+            words = self.words.copy()+other.words.copy()
+            return ColoredText(style=other.style, words=words)
+        words = self.words.copy() + [str(other)]
+        return ColoredText(style=self.style, words=words)
