@@ -6,7 +6,7 @@ from typing import List
 
 from ..utils.github_scanner import query_matching_repos
 from ..utils.github_entities import Team
-from ..utils import ensure_gh_token
+from ..ensures import ensure_gh_token
 from ..config.github import config_github, config_grant_read_access
 
 # Use a "team slug"

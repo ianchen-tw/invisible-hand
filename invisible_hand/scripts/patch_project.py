@@ -16,7 +16,7 @@ from halo import Halo
 from requests.api import patch
 
 from ..core.color_text import normal, warn
-from ..utils import ensure_gh_token
+from invisible_hand.ensures import ensure_git_cached, ensure_gh_token
 from ..utils.github_scanner import query_matching_repos, github_headers, get_github_endpoint_paged_list, query_matching_repos
 from ..config.github import config_github
 
@@ -34,6 +34,7 @@ from ..config.github import config_github
 @click.option('--only-repo', nargs=1, help="only repo to patch")
 def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo):
     '''Patch to student homeworks'''
+    ensure_git_cached()
     ensure_gh_token(token)
     # init
     spinner = Halo(stream=sys.stderr)
