@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "invisible-hand"
-version = "0.2.1"
+version = "0.2.2"
 description = "Automate your workflow with github classroom"
 authors = ["Ian Chen <ianre657@gmail.com>"]
 readme = "README.md"

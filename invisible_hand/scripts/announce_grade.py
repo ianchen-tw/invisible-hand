@@ -19,7 +19,7 @@ from halo import Halo
 from ..config.github import config_github, config_announce_grade
 
 from ..core.color_text import normal
-from ..utils import ensure_gh_token
+from ..ensures import ensure_gh_token
 from ..utils.github_scanner import get_github_endpoint_paged_list_async
 from ..utils.google_student import Gstudents
 
