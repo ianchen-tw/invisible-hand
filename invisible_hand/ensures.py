@@ -28,6 +28,6 @@ def ensure_gh_token(token: str):
             "Authorization": f"token {token}",
         }
     )
-    res = httpx.get(f"https://api.github.com/user", headers=httpx_headers)
+    res = httpx.get("https://api.github.com/user", headers=httpx_headers)
     if res.status_code != 200:
         raise ERR_INVALID_GITHUB_TOKEN(token=token)

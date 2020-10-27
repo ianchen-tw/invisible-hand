@@ -41,7 +41,7 @@ def add_students(student_handles, token, org, team):
     student_handles: github user to add (usernames)
     """
     if len(student_handles) == 0:
-        print(f"required handles")
+        print("required handles")
         return 1
 
     github_students = student_handles
@@ -91,7 +91,7 @@ def add_students(student_handles, token, org, team):
     if len(invalid_id) != 0:
         print("Find non-existed github user names:")
         # control strings take space
-        print_table([warn.txt(f"i").to_str() for i in invalid_id], cols=5, wide=25)
+        print_table([warn.txt("i").to_str() for i in invalid_id], cols=5, wide=25)
 
     non_member_valid_users = list(set(outside_users) - set(invalid_id))
 

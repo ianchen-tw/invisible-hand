@@ -33,7 +33,7 @@ class ColoredText:
 
     def newline(self):
         words = self.words.copy()
-        words.append(f"\n")
+        words.append("\n")
         return ColoredText(style=self.style, words=words)
 
     def __to_str(self):

@@ -6,6 +6,7 @@ import tempfile
 from datetime import datetime
 from functools import wraps
 from pathlib import Path
+from pprint import pprint
 from time import time
 from typing import Dict, List, Optional
 
@@ -151,12 +152,20 @@ def announce_grade(homework_prefix, token, dry, org, only_id, feedback_source_re
             for fb in feedbacks:
                 nursery.start_soon(push_feedback, fb)
 
+    # print out target repos
+    print("repo to announce grade:")
+    pprint([fb["repo_name"] for fb in fbs])
+
     if dry:
-        spinner.success(f"DRYRUN: skip push to remote")
+        spinner.success("DRYRUN: skip push to remote")
     else:
-        _, t = measure_time(trio.run)(push_to_remote, student_feedback_title, fbs)
-        spinner.succeed(f"Push feedbacks to remote ... {t:5.2f} sec")
-    spinner.succeed(f"finished announce grade")
+        if click.confirm("Do you want to continue?", default=False):
+            _, t = measure_time(trio.run)(push_to_remote, student_feedback_title, fbs)
+            spinner.succeed(f"Push feedbacks to remote ... {t:5.2f} sec")
+        else:
+            spinner.warn("You refused to publish to remote")
+
+    spinner.succeed("finished announce grade")
     return
 
 

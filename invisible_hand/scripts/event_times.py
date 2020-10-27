@@ -12,14 +12,18 @@ from typing import List, NamedTuple, Tuple
 
 # import argparse
 import click
+import iso8601
 from halo import Halo
 from tabulate import tabulate
 
 from ..config.github import config_event_times, config_github
 from ..ensures import ensure_gh_token
 from ..utils.github_entities import Team
-from ..utils.github_scanner import *
-from ..utils.github_scanner import LOCAL_TIMEZONE
+from ..utils.github_scanner import (
+    LOCAL_TIMEZONE,
+    get_github_endpoint_paged_list,
+    localtime_from_iso_datestr,
+)
 
 
 def is_deadline_passed(dl: datetime, submit: datetime) -> Tuple[bool, timedelta]:

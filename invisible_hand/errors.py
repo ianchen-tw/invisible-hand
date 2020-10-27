@@ -21,7 +21,7 @@ class ERR_GIT_CREDENTIAL_HELPER_NOT_FOUND(Exception):
                 ljust("  git config --global credential.helper cache", leng)
             ).newline()
             + warn.txt(ljust(" before going any further.", leng)).newline()
-            + warn.txt(f" Or see: ")
+            + warn.txt(" Or see: ")
             + warn.kw2(f" {url_for_issue(issue_num=8)}   ").newline()
             + warn.txt(ljust(" for more information", leng))
             + warn.newline()
