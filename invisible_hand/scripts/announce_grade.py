@@ -157,7 +157,7 @@ def announce_grade(homework_prefix, token, dry, org, only_id, feedback_source_re
     pprint([fb["repo_name"] for fb in fbs])
 
     if dry:
-        spinner.success("DRYRUN: skip push to remote")
+        spinner.succeed("DRYRUN: skip push to remote")
     else:
         if click.confirm("Do you want to continue?", default=False):
             _, t = measure_time(trio.run)(push_to_remote, student_feedback_title, fbs)
