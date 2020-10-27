@@ -4,7 +4,7 @@ ALL: test
 clean:
 	find . -name "*.py[co]" -o -name __pycache__ -exec rm -rf {} +
 
-better: lint format
+better: format lint
 
 format:
 	isort --force-single-line-imports invisible_hand
@@ -18,8 +18,21 @@ format:
 	# formatter
 	black invisible_hand
 
+format-test-src:
+	isort --force-single-line-imports tests
+
+	# remove unused imports
+	autoflake --remove-all-unused-imports --recursive --remove-unused-variables --in-place tests --exclude=__init__.py
+
+	# sort and gather imports
+	isort tests
+
+	# formatter
+	black tests
+
 lint:
 	pyflakes invisible_hand
+	pyflakes tests
 
 test:
 	pytest -s -v

@@ -1,7 +1,30 @@
-from typing import Optional
+from pprint import pformat
+from typing import Dict, List, Optional
 
 from .core.color_text import warn
 from .urls import url_for_issue
+
+
+class ERR_UNIQUE_STUDENT_ID(Exception):
+    def __init__(self, explanation: str, instances: List[Dict]):
+        super().__init__(self)
+        self.explanation: str = explanation
+        self.instances: List[Dict] = instances
+
+    def __str__(self):
+        words = [warn.txt(self.explanation), pformat(self.instances)]
+        return "\n".join(words)
+
+
+class ERR_REQUIRE_NO_SPACE(Exception):
+    def __init__(self, explanation: str, instances: List[str]):
+        super().__init__(self)
+        self.explanation: str = explanation
+        self.instances: List[str] = instances
+
+    def __str__(self):
+        words = [self.explanation, pformat(self.instances)]
+        return "\n".join(words)
 
 
 class ERR_GIT_CREDENTIAL_HELPER_NOT_FOUND(Exception):

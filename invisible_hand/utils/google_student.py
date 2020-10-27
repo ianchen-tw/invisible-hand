@@ -1,9 +1,28 @@
 from typing import Dict, List, Optional
 
 import pygsheets
+from pydantic import BaseModel
 from xlsxwriter.utility import xl_col_to_name
 
 from ..config.gsheet import config_gsheet
+from ..errors import ERR_REQUIRE_NO_SPACE, ERR_UNIQUE_STUDENT_ID
+
+
+class StudentInfo(BaseModel):
+    # student_id must be unique
+    student_id: str
+
+    github_handle: str
+    name: Optional[str] = None
+    email: Optional[str] = None
+
+
+def contains_space(word: str) -> bool:
+    """test if there's any white space in the give word"""
+    for s in word:
+        if s.isspace():
+            return True
+    return False
 
 
 class pygsheetInteractor:
@@ -57,38 +76,94 @@ class Gstudents:
             "main_kws_key_field": "student_id",
         }
 
-    def get_students(self) -> List[Dict[str, str]]:
-        return self.actor.get_all_record(self.config["main_wks_title"])
+        # parse and get student infos
+        student_infos = self._build_student_info_records()
+        self._ensure_no_space_in_student_fields(student_infos)
+        self._ensure_unique_student_id(student_infos)
+        self.student_infos: List[StudentInfo] = student_infos
 
-    def get_student(self, student_id) -> Optional[Dict]:
+    def _build_student_info_records(self) -> List[StudentInfo]:
+        """Get student info from google sheet and do preliminary test"""
+        records = self.actor.get_all_record(self.config["main_wks_title"])
+        student_infos = []
+        for record in records:
+            student_infos.append(
+                StudentInfo(
+                    student_id=record.get("student_id"),
+                    github_handle=record.get("github_handle"),
+                    name=record.get("name"),
+                    email=record.get("email"),
+                )
+            )
+        return student_infos
+
+    def get_student_infos(self) -> List[StudentInfo]:
+        return self.student_infos
+
+    def get_students(self) -> List[Dict[str, str]]:
+        """Return the student infos in dict"""
+        result = []
+        for s in self.student_infos:
+            result.append(dict(s.dict()))
+        return result
+
+    def get_student_info(self, student_id: str) -> Optional[StudentInfo]:
         """Fetch a single students info, will traverse the entire table
         Use get_students manually if you need to get each student's info
         """
-        students = self.get_students()
-        ret = []
+        students: List[StudentInfo] = self.student_infos
         for s in students:
-            if student_id == s["student_id"]:
-                ret.append(s)
+            if student_id == s.student_id:
+                return s
+        return None
 
-        if len(ret) > 1:
-            raise RuntimeError(f"duplicate student_id :{ret}")
-        return ret[0] if len(ret) > 0 else None
+    def get_student(self, student_id: str) -> Optional[Dict[str, str]]:
+        student = self.get_student_info(student_id)
+        if student:
+            return dict(student)
+        return None
 
     def left_join(self, right_sheet_title) -> List[Dict[str, str]]:
-        # TODO: check id collision
-        left_dicts = self.get_students()
         right_dicts = self.actor.get_all_record(right_sheet_title)
 
         def left_matching(left, right, key_field: str):
-            for l in left:
+            for info in left:
                 for r in right:
-                    if l[key_field] == r[key_field]:
-                        yield l, r
+                    l_val = getattr(info, key_field)
+                    r_val = r.get(key_field)
+                    if l_val and r_val and l_val == r_val:
+                        yield dict(info), r
 
         joined_infos = []
         for left, right in left_matching(
-            left_dicts, right_dicts, self.config["main_kws_key_field"]
+            self.student_infos, right_dicts, self.config["main_kws_key_field"]
         ):
             student = {**left, **right}
             joined_infos.append(student)
         return joined_infos
+
+    def _ensure_unique_student_id(self, student_infos: List[StudentInfo]):
+        ids = set()
+        errors: List[Dict] = []
+        for info in student_infos:
+            if info.student_id not in ids:
+                ids.add(info.student_id)
+            else:
+                errors.append(info.dict())
+        if len(errors) > 0:
+            raise ERR_UNIQUE_STUDENT_ID(
+                explanation="Student ID should be unique, found:", instances=errors
+            )
+
+    def _ensure_no_space_in_student_fields(self, student_infos: List[StudentInfo]):
+        errors: List[str] = []
+        for info in student_infos:
+            for field in self.config["main_wks_required_fields"]:
+                value = getattr(info, field)
+                if contains_space(value):
+                    errors.append(value)
+        if len(errors) > 0:
+            raise ERR_REQUIRE_NO_SPACE(
+                "Detect white spaces in fields, please remove it before going any further",
+                errors,
+            )
