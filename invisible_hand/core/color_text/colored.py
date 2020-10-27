@@ -1,4 +1,4 @@
-from colorama import Fore, Back, Style
+from colorama import Back, Fore, Style
 
 
 def Colored(style):
@@ -11,11 +11,11 @@ class ColoredText:
         self.style = style
 
     def __reset(self):
-        return f'{Style.RESET_ALL}{Fore.RESET}{Back.RESET}'
+        return f"{Style.RESET_ALL}{Fore.RESET}{Back.RESET}"
 
     def __append_word(self, style, s):
         words = self.words.copy()
-        words.append(f'{style}{s}{self.__reset()}')
+        words.append(f"{style}{s}{self.__reset()}")
         return ColoredText(style=self.style, words=words)
 
     def __get_style(self, method: str):
@@ -23,29 +23,29 @@ class ColoredText:
 
     # Define functions here to provide code completion hint
     def txt(self, s):
-        return self.__append_word(self.__get_style('txt'), str(s))
+        return self.__append_word(self.__get_style("txt"), str(s))
 
     def kw(self, s):
-        return self.__append_word(self.__get_style('kw'), str(s))
+        return self.__append_word(self.__get_style("kw"), str(s))
 
     def kw2(self, s):
-        return self.__append_word(self.__get_style('kw2'), str(s))
+        return self.__append_word(self.__get_style("kw2"), str(s))
 
     def newline(self):
         words = self.words.copy()
-        words.append(f'\n')
+        words.append(f"\n")
         return ColoredText(style=self.style, words=words)
 
     def __to_str(self):
         words = []
         for w in self.words:
-            if w[0] == '\n':
+            if w[0] == "\n":
                 pass
-            if w[-1] == '\n':
+            if w[-1] == "\n":
                 pass
 
-        words = [w.replace('\n', f'{Style.RESET_ALL}\n') for w in self.words]
-        return ''.join(words)
+        words = [w.replace("\n", f"{Style.RESET_ALL}\n") for w in self.words]
+        return "".join(words)
 
     def to_str(self):
         return self.__to_str()
@@ -66,7 +66,7 @@ class ColoredText:
 
     def __add__(self, other):
         if isinstance(other, ColoredText):
-            words = self.words.copy()+other.words.copy()
+            words = self.words.copy() + other.words.copy()
             return ColoredText(style=other.style, words=words)
         words = self.words.copy() + [str(other)]
         return ColoredText(style=self.style, words=words)

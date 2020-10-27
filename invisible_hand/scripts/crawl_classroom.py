@@ -1,24 +1,23 @@
-import sys
+import atexit
 import errno
 import os
 import shutil
-import atexit
+import sys
 from pathlib import Path
 
 import click
-from halo import Halo
-
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
 from bs4 import BeautifulSoup
+from halo import Halo
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 from ..config.github import config_crawl_classroom
 
 spinner = Halo(stream=sys.stderr)
+
 
 class Condition_logined:
     def __init__(self):
@@ -28,11 +27,12 @@ class Condition_logined:
         try:
             # will throw an exception if target not found
             _ = driver.find_element_by_id("login_field")
-            #print("I can still see login field")
+            # print("I can still see login field")
             return False
         except:
-            #print("no more login field found")
+            # print("no more login field found")
             return True
+
 
 # TODO:
 #  - error handling
@@ -52,19 +52,21 @@ BaseURL = "https://classroom.github.com"
 
 
 @click.command()
-@click.argument('hw_title')
-@click.argument('output')
-@click.option('--login', default=config_crawl_classroom['login'], show_default=True)
-@click.option('--passwd')
-@click.option('--classroom_id', default=config_crawl_classroom['classroom_id'], show_default=True)
+@click.argument("hw_title")
+@click.argument("output")
+@click.option("--login", default=config_crawl_classroom["login"], show_default=True)
+@click.option("--passwd")
+@click.option(
+    "--classroom_id", default=config_crawl_classroom["classroom_id"], show_default=True
+)
 def crawl_classroom(hw_title, login, passwd, classroom_id, output):
-    '''Get student homework submitted version from github classroom
-        @output :filename to output your result
-    '''
+    """Get student homework submitted version from github classroom
+    @output :filename to output your result
+    """
     spinner.start()
     if output is not None:
         if Path(output).exists():
-            spinner.info(f'Overwrite existing file: {output}')
+            spinner.info(f"Overwrite existing file: {output}")
 
     spinner.text = "Initializing Chrome driver"
     # We can only use headless=False
@@ -76,10 +78,7 @@ def crawl_classroom(hw_title, login, passwd, classroom_id, output):
 
     # gh classroom assigment page
     spinner.text = "Opening GitHub Classroom"
-    driver.get(
-        BaseURL+"/classrooms/{}/assignments/{}"
-        .format(classroom_id, hw_title)
-    )
+    driver.get(BaseURL + "/classrooms/{}/assignments/{}".format(classroom_id, hw_title))
 
     # user id
     input_id = driver.find_element_by_id("login_field")
@@ -112,26 +111,23 @@ def crawl_classroom(hw_title, login, passwd, classroom_id, output):
     not_submitted_list = []
     page_loaded = 0
     while True:
-        spinner.text = "Loading page {}".format(page_loaded+1)
+        spinner.text = "Loading page {}".format(page_loaded + 1)
         spinner.start()
         wait_for_page_load(driver)
         page_loaded += 1
         spinner.succeed("Page {} loaded".format(page_loaded))
-        soup = BeautifulSoup(driver.page_source, 'lxml')
+        soup = BeautifulSoup(driver.page_source, "lxml")
         next_btn = soup.find("a", "next")
 
         li = soup.find_all("div", "assignment-repo-list-item")
         for i in li:
-            user_id = i.find(
-                "a", "assignment-repo-github-url").find("h3").contents[0]
-            links_to_commit = i.find(
-                "a", attrs={"aria-label": "View Submission"})
+            user_id = i.find("a", "assignment-repo-github-url").find("h3").contents[0]
+            links_to_commit = i.find("a", attrs={"aria-label": "View Submission"})
 
             if links_to_commit is not None:
-                commit_url = links_to_commit['href']
-                commit_hash = commit_url.rsplit('/', 1)[-1]
-                submitted_str = "{}-{}:{}".format(
-                    hw_title, user_id, commit_hash[0:7])
+                commit_url = links_to_commit["href"]
+                commit_hash = commit_url.rsplit("/", 1)[-1]
+                submitted_str = "{}-{}:{}".format(hw_title, user_id, commit_hash[0:7])
                 submitted_infos.append(submitted_str)
                 # print(submitted_str)
             else:
@@ -139,17 +135,17 @@ def crawl_classroom(hw_title, login, passwd, classroom_id, output):
 
         if next_btn == None:
             break
-        driver.get(BaseURL + next_btn['href'])
+        driver.get(BaseURL + next_btn["href"])
     spinner.succeed("Success")
 
     ostream = sys.stdout
     if output is not None:
-        ostream = open(output, 'w')
+        ostream = open(output, "w")
         atexit.register(lambda: ostream.close)
 
     for i in submitted_infos:
-        print(i, end=' ', file=ostream)
-    print('', file=ostream)
+        print(i, end=" ", file=ostream)
+    print("", file=ostream)
 
     if len(not_submitted_list) != 0:
         print("Students not submitted:", file=sys.stderr)
@@ -165,8 +161,7 @@ def createDriver(headless=True) -> webdriver:
 
     cdriver_path = shutil.which("chromedriver")
     if cdriver_path is None:
-        raise FileNotFoundError(
-            errno.ENOENT, os.strerror(errno.ENOENT), "chromedriver")
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), "chromedriver")
     driver = webdriver.Chrome(options=options, executable_path=cdriver_path)
     return driver
 
@@ -176,11 +171,12 @@ def wait_for_page_load(driver):
         _ = WebDriverWait(driver, 30).until(
             # This id is generated by my chrome extension
             EC.presence_of_element_located(
-                (By.ID, "chrome-extension-classroom-waiter-loaded"))
+                (By.ID, "chrome-extension-classroom-waiter-loaded")
+            )
         )
     except:
         driver.close()
-        raise("Timeout: cannot load assignment page")
+        raise ("Timeout: cannot load assignment page")
 
 
 if __name__ == "__main__":

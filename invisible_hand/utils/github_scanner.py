@@ -6,18 +6,16 @@
 # This file has all the shared logic for interacting with the GitHub service, including keeping
 # a local cache to speed things up.
 
+import json
+import os
+import re
+import sys
+from datetime import datetime, timezone
+from typing import List
+
 import iso8601
 import requests
-import sys
-import os
-import json
-import re
-from typing import List
-from datetime import datetime, timezone
-
 import trio
-import httpx
-
 from requests.models import Response
 
 scanner_cache = {}
@@ -34,7 +32,7 @@ def load_cache(github_organization: str, verbose: bool = True):
     cache_name = ".github-classroom-utils." + github_organization + ".json"
     try:
         if os.path.isfile(cache_name) and os.access(cache_name, os.R_OK):
-            with open(cache_name, 'r') as file:
+            with open(cache_name, "r") as file:
                 data = json.loads(file.read())
                 scanner_cache[github_organization] = data
                 if verbose:
@@ -49,13 +47,16 @@ def load_cache(github_organization: str, verbose: bool = True):
 def store_cache(github_organization: str, verbose: bool = True):
     if github_organization not in scanner_cache:
         if verbose:
-            print("Warning: nothing in cache for " +
-                  github_organization + ". Nothing to persist to disk.")
+            print(
+                "Warning: nothing in cache for "
+                + github_organization
+                + ". Nothing to persist to disk."
+            )
         return
 
     cache_name = ".github-classroom-utils." + github_organization + ".json"
     try:
-        with open(cache_name, 'w') as file:
+        with open(cache_name, "w") as file:
             # Pretty-printing the results, even though they're larger. Human-legibility may come in handy.
             file.write(dict_to_pretty_json(scanner_cache[github_organization]))
 
@@ -74,14 +75,16 @@ def github_headers(github_token: str) -> dict:
     If github_token is an empty string, this prints an error message and crashes the program.
     """
     if github_token == "":
-        print("\nError: github_token isn't defined, use the --token argument or edit github_config.py to set it")
+        print(
+            "\nError: github_token isn't defined, use the --token argument or edit github_config.py to set it"
+        )
         exit(1)
 
     return {
         "User-Agent": "GitHubClassroomUtils/1.0",
         "Authorization": "token " + github_token,
         # needed for the check-suites request
-        "Accept": "application/vnd.github.antiope-preview+json"
+        "Accept": "application/vnd.github.antiope-preview+json",
     }
 
 
@@ -90,10 +93,16 @@ def fail_on_github_errors(response: Response):
         print("\nRequest failed, status code: %d" % response.status_code)
         print("Headers: %s\n" % dict_to_pretty_json(dict(response.headers)))
         print("Body: %s\n" % dict_to_pretty_json(response.json()))
-        raise(Exception("Request github error: status code -{}".format(response.status_code)))
+        raise (
+            Exception(
+                "Request github error: status code -{}".format(response.status_code)
+            )
+        )
 
 
-def query_repos_cached(github_organization: str, github_token: str, verbose: bool = True) -> List[dict]:
+def query_repos_cached(
+    github_organization: str, github_token: str, verbose: bool = True
+) -> List[dict]:
     load_cache(github_organization, verbose)
 
     # How we can tell if our cache is valid: we do a HEAD request to GitHub, which doesn't consume any
@@ -113,32 +122,38 @@ def query_repos_cached(github_organization: str, github_token: str, verbose: boo
 
     request_headers = github_headers(github_token)
 
-    previous_etag = scanner_cache[github_organization]["ETag"] if github_organization in scanner_cache else ""
-    head_status = requests.head('https://api.github.com/orgs/' + github_organization + '/repos',
-                                headers=request_headers)
+    previous_etag = (
+        scanner_cache[github_organization]["ETag"]
+        if github_organization in scanner_cache
+        else ""
+    )
+    head_status = requests.head(
+        "https://api.github.com/orgs/" + github_organization + "/repos",
+        headers=request_headers,
+    )
     fail_on_github_errors(head_status)
 
     current_etag = head_status.headers["ETag"]
 
     if previous_etag == current_etag:
         if verbose:
-            print('Cached result for ' + github_organization + ' is current')
+            print("Cached result for " + github_organization + " is current")
         return scanner_cache[github_organization]["Contents"]
     else:
         if verbose:
-            print('Cached result for ' + github_organization +
-                  ' is missing or outdated')
+            print("Cached result for " + github_organization + " is missing or outdated")
 
     if verbose:
-        sys.stdout.write('Getting repo list from GitHub')
+        sys.stdout.write("Getting repo list from GitHub")
 
-    all_repos_list = get_github_endpoint_paged_list('orgs/' + github_organization + '/repos',
-                                                    github_token, verbose)
+    all_repos_list = get_github_endpoint_paged_list(
+        "orgs/" + github_organization + "/repos", github_token, verbose
+    )
 
     # force it to exist before we create sub-keys
     scanner_cache[github_organization] = {}
-    scanner_cache[github_organization]['ETag'] = current_etag
-    scanner_cache[github_organization]['Contents'] = all_repos_list
+    scanner_cache[github_organization]["ETag"] = current_etag
+    scanner_cache[github_organization]["Contents"] = all_repos_list
 
     num_repos = len(all_repos_list)
     if verbose:
@@ -151,10 +166,12 @@ def query_repos_cached(github_organization: str, github_token: str, verbose: boo
     return all_repos_list
 
 
-def query_matching_repos(github_organization: str,
-                         github_repo_prefix: str,
-                         github_token: str,
-                         verbose: bool = True) -> List[dict]:
+def query_matching_repos(
+    github_organization: str,
+    github_repo_prefix: str,
+    github_token: str,
+    verbose: bool = True,
+) -> List[dict]:
     """
     This is the function we expect most of our GitHub Classroom utilities to use. Every GitHub repository has
     a URL of the form https://github.com/Organization/Repository/contents, so the arguments given specify
@@ -182,36 +199,43 @@ def query_matching_repos(github_organization: str,
     :return: A list of Python dicts containing the results of the query.
     """
     result = query_repos_cached(github_organization, github_token, verbose)
-    return [x for x in result if x['name'].startswith(github_repo_prefix)]
+    return [x for x in result if x["name"].startswith(github_repo_prefix)]
 
 
 def make_repo_private(repo: dict, github_token: str):
-    requests.patch('https://api.github.com/repos/' + repo['full_name'],
-                   headers=github_headers(github_token),
-                   json={'private': True})
+    requests.patch(
+        "https://api.github.com/repos/" + repo["full_name"],
+        headers=github_headers(github_token),
+        json={"private": True},
+    )
 
 
 def get_github_endpoint(endpoint: str, github_token: str, verbose: bool = True) -> dict:
-    result = requests.get('https://api.github.com/' +
-                          endpoint, headers=github_headers(github_token))
+    result = requests.get(
+        "https://api.github.com/" + endpoint, headers=github_headers(github_token)
+    )
     fail_on_github_errors(result)
 
     return result.json()
 
 
-def get_github_endpoint_paged_list(endpoint: str, github_token: str, verbose: bool = True, **kwarg) -> List[dict]:
+def get_github_endpoint_paged_list(
+    endpoint: str, github_token: str, verbose: bool = True, **kwarg
+) -> List[dict]:
     page_number = 1
     result_list = []
 
     while True:
         if verbose:
-            sys.stdout.write('.')
+            sys.stdout.write(".")
             sys.stdout.flush()
 
         headers = github_headers(github_token)
-        result = requests.get('https://api.github.com/' + endpoint,
-                              headers=headers,
-                              params={'page': page_number, **kwarg} if page_number > 1 else {**kwarg})
+        result = requests.get(
+            "https://api.github.com/" + endpoint,
+            headers=headers,
+            params={"page": page_number, **kwarg} if page_number > 1 else {**kwarg},
+        )
         fail_on_github_errors(result)
         page_number = page_number + 1
 
@@ -226,20 +250,25 @@ def get_github_endpoint_paged_list(endpoint: str, github_token: str, verbose: bo
 
     return result_list
 
-async def get_github_endpoint_paged_list_async(client, endpoint: str, **kwarg) -> List[dict]:
+
+async def get_github_endpoint_paged_list_async(
+    client, endpoint: str, **kwarg
+) -> List[dict]:
     paged_res = {}
 
-    async def get_page_res(url,page,**kwarg):
-        return await client.get(url,params={'page':page, **kwarg})
+    async def get_page_res(url, page, **kwarg):
+        return await client.get(url, params={"page": page, **kwarg})
 
     # first query, get total number of pages
     page_number = 1
     # res_first_page = client.get('https://api.github.com/' + endpoint, params={'page':page_number, **kwarg})
-    res_first_page = await get_page_res(f'https://api.github.com/{endpoint}', page_number, **kwarg)
+    res_first_page = await get_page_res(
+        f"https://api.github.com/{endpoint}", page_number, **kwarg
+    )
     paged_res[page_number] = res_first_page.json()
 
     # serch through media string and find the last page index
-    media_link_str = str(res_first_page.headers.get('link'))
+    media_link_str = str(res_first_page.headers.get("link"))
     # print(res_first_page.headers)
     link_to_last_page = re.compile('<https:[^>]*?\?page=(\d*)[^>]*>; rel="(last)"')
     match = link_to_last_page.search(media_link_str)
@@ -248,10 +277,14 @@ async def get_github_endpoint_paged_list_async(client, endpoint: str, **kwarg) -
         last_page_idx = match.group(1)
 
     async with trio.open_nursery() as nursery:
+
         async def collect_res(i):
-            res = await get_page_res(f'https://api.github.com/{endpoint}', page_number, **kwarg)
+            res = await get_page_res(
+                f"https://api.github.com/{endpoint}", page_number, **kwarg
+            )
             paged_res[i] = res.json()
-        for i in range(1,last_page_idx+1):
+
+        for i in range(1, last_page_idx + 1):
             nursery.start_soon(collect_res, i)
 
     result_list = []
@@ -306,5 +339,9 @@ def desired_user(github_prefix: str, ignore_list: List[str], name: str) -> bool:
     lower_case_ignore_list = [x.lower() for x in ignore_list]
 
     m = student_name_from(github_prefix, name).lower()
-    return m != "" and name.startswith(github_prefix) and name != github_prefix and \
-        m not in lower_case_ignore_list
+    return (
+        m != ""
+        and name.startswith(github_prefix)
+        and name != github_prefix
+        and m not in lower_case_ignore_list
+    )

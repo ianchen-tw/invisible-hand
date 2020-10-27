@@ -1,7 +1,7 @@
 # import click
 
-from pathlib import Path
 from configparser import ConfigParser
+from pathlib import Path
 
 from .config_util import init_config_file
 
@@ -17,7 +17,7 @@ config_grant_read_access = None
 
 
 def init_constants():
-    '''initialize all constants'''
+    """initialize all constants"""
     global config_github
     global config_announce_grade
     global config_add_students
@@ -25,7 +25,7 @@ def init_constants():
     global config_crawl_classroom
     global config_grant_read_access
 
-    template_name = 'github.ini'
+    template_name = "github.ini"
     cfile = "github_config.ini"
 
     if not Path(cfile).exists():
@@ -36,9 +36,9 @@ def init_constants():
     config.read(cfile)
 
     # export global variables
-    config_github = dict(config['github'])
-    config_event_times = dict(config['event_times'])
-    config_add_students = dict(config['add_students'])
-    config_announce_grade = dict(config['announce_grade'])
-    config_crawl_classroom = dict(config['crawl_classroom'])
-    config_grant_read_access = dict(config['grant_read_access'])
+    config_github = dict(config["github"])
+    config_event_times = dict(config["event_times"])
+    config_add_students = dict(config["add_students"])
+    config_announce_grade = dict(config["announce_grade"])
+    config_crawl_classroom = dict(config["crawl_classroom"])
+    config_grant_read_access = dict(config["grant_read_access"])
