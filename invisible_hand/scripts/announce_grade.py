@@ -42,6 +42,12 @@ def measure_time(f):
 @click.option(
     "--token", default=config_github["personal_access_token"], help="github access token"
 )
+@click.option(
+    "--dry",
+    help="dry run, do not publish result to the remote",
+    is_flag=True,
+    default=False,
+)
 @click.option("--org", default=config_github["organization"], show_default=True)
 @click.option("--only-id", nargs=1, help="only id to announce")
 @click.option(
@@ -49,7 +55,7 @@ def measure_time(f):
     default=config_announce_grade["feedback_source_repo"],
     show_default=True,
 )
-def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
+def announce_grade(homework_prefix, token, dry, org, only_id, feedback_source_repo):
     """announce student grades to each hw repo"""
 
     ensure_gh_token(token)
@@ -78,7 +84,7 @@ def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
 
     feedback_repo_path = root_folder / "feedbacks"
 
-    spinner.start(f"cloning feeback source repo : {feedback_source_repo}")
+    spinner.info(f"cloning feeback source repo : {feedback_source_repo}")
     _, t = measure_time(sp.run)(
         [
             "git",
@@ -87,8 +93,6 @@ def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
             feedback_repo_path.name,
         ],
         cwd=root_folder,
-        stdout=sp.DEVNULL,
-        stderr=sp.DEVNULL,
     )
     spinner.succeed(
         f"cloning feeback source repo : {feedback_source_repo} ... {t:4.2f} sec"
@@ -147,8 +151,11 @@ def announce_grade(homework_prefix, token, org, only_id, feedback_source_repo):
             for fb in feedbacks:
                 nursery.start_soon(push_feedback, fb)
 
-    _, t = measure_time(trio.run)(push_to_remote, student_feedback_title, fbs)
-    spinner.succeed(f"Push feedbacks to remote ... {t:5.2f} sec")
+    if dry:
+        spinner.success(f"DRYRUN: skip push to remote")
+    else:
+        _, t = measure_time(trio.run)(push_to_remote, student_feedback_title, fbs)
+        spinner.succeed(f"Push feedbacks to remote ... {t:5.2f} sec")
     spinner.succeed(f"finished announce grade")
     return
 
