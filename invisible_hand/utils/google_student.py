@@ -67,12 +67,7 @@ class Gstudents:
 
         self.config = {
             "main_wks_title": "StudentInfo",
-            "main_wks_required_fields": [
-                "github_handle",
-                "student_id",
-                "name",
-                "email",
-            ],
+            "main_wks_required_fields": ["github_handle", "student_id", "name", "email",],
             "main_kws_key_field": "student_id",
         }
 

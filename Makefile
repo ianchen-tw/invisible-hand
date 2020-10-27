@@ -35,7 +35,7 @@ lint:
 	pyflakes tests
 
 test:
-	pytest -s -v
+	pytest tests -s -v
 
 test-cov:
 	# see test coverage report
