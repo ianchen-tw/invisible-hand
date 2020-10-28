@@ -5,6 +5,7 @@ import sys
 import tempfile
 from datetime import datetime
 from pathlib import Path
+from typing import Dict, Optional
 
 import click
 import requests
@@ -34,7 +35,13 @@ from ..utils.github_scanner import (
 )
 @click.option("--org", default=config_github["organization"], show_default=True)
 @click.option("--only-repo", nargs=1, help="only repo to patch")
-def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo):
+@click.option(
+    "--dry",
+    help="dry run, do not publish result to the remote",
+    is_flag=True,
+    default=False,
+)
+def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo, dry):
     """Patch to student homeworks"""
     ensure_git_cached()
     ensure_gh_token(token)
@@ -72,14 +79,17 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo):
     issues = get_github_endpoint_paged_list(
         endpoint=f"repos/{org}/{source_repo}/issues", github_token=token, verbose=False
     )
-    issue_tmpl_found = False
-    for i in issues:
-        if i["title"].strip() == patch_branch.strip():
-            issue_tmpl_found = True
-            issue_tmpl_body = i["body"]
-            break
-    if not issue_tmpl_found:
+
+    def find_target_issue() -> Optional[Dict]:
+        for issue in issues:
+            if issue["title"].strip() == patch_branch.strip():
+                return issue
+        return None
+
+    target_issue = find_target_issue()
+    if not target_issue:
         raise Exception(f"cannot found issue tmpl `{patch_branch}` on `{source_repo}`")
+    issue_tmpl_body = target_issue["body"]
     spinner.succeed()
 
     root_folder = Path(
@@ -219,6 +229,9 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo):
         )
 
         spinner.text = pre_prompt_str + normal.kw(" publish patch to remote...").to_str()
+        if dry:
+            spinner.succeed(pre_prompt_str + normal.txt(" Patched ").to_str())
+            continue
         res = sp.run(
             ["git", "push", "-u", "origin", patch_branch],
             cwd=student_path / hw_repo_name,
