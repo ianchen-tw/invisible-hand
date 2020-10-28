@@ -12,7 +12,7 @@ class ERR_UNIQUE_STUDENT_ID(Exception):
         self.instances: List[Dict] = instances
 
     def __str__(self):
-        words = [warn.txt(self.explanation), pformat(self.instances)]
+        words = [self.explanation, pformat(self.instances)]
         return "\n".join(words)
 
 
