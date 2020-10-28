@@ -16,11 +16,17 @@ from ..utils.github_scanner import query_matching_repos
 @click.option(
     "--token", default=config_github["personal_access_token"], help="github access token"
 )
+@click.option(
+    "--dry",
+    help="dry run, do not fire final request to remote",
+    is_flag=True,
+    default=False,
+)
 @click.option("--org", default=config_github["organization"], show_default=True)
 @click.option(
     "--team", default=config_grant_read_access["reader_team_slug"], show_default=True
 )
-def grant_read_access(hw_title, token, org, team):
+def grant_read_access(hw_title, dry, token, org, team):
     """Grant read access right of TA's group to students' homework repo"""
     print("start script")
 
@@ -53,7 +59,8 @@ def grant_read_access(hw_title, token, org, team):
         async def async_github():
             async with trio.open_nursery() as nursery:
                 for repo_name in repo_names:
-                    nursery.start_soon(subscribe_to_repo, teaching_team, repo_name)
+                    if not dry:
+                        nursery.start_soon(subscribe_to_repo, teaching_team, repo_name)
                     fired.update(1)
                     fired.refresh()
                 return

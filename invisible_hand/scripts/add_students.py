@@ -1,3 +1,5 @@
+import sys
+
 import click
 import requests
 from halo import Halo
@@ -30,13 +32,19 @@ def print_table(data, cols=5, wide=15, indent=2):
 @click.command()
 @click.argument("student_handles", nargs=-1)
 @click.option(
+    "--dry",
+    help="dry run, do not fire final request to remote",
+    is_flag=True,
+    default=False,
+)
+@click.option(
     "--token", default=config_github["personal_access_token"], help="github access token"
 )
 @click.option("--org", default=config_github["organization"], show_default=True)
 @click.option(
     "--team", default=config_add_students["default_team_slug"], show_default=True
 )
-def add_students(student_handles, token, org, team):
+def add_students(student_handles, dry, token, org, team):
     """
     student_handles: github user to add (usernames)
     """
@@ -51,42 +59,47 @@ def add_students(student_handles, token, org, team):
 
     ensure_gh_token(github_token)
 
-    # print('org: {}'.format(github_organization))
-    # print('token: {}'.format(github_token))
-    # print("students:{}".format(github_students))
+    # TODO: use logging lib to log messages
+    spinner = Halo(stream=sys.stderr)
+    if dry:
+        spinner.info("Dry run")
 
-    with Halo() as spinner:
-        spinner.text = "fetch existing team members from GitHub"
-        team = Team(github_organization, team_slug=github_team, github_token=github_token)
-        spinner.succeed()
+    spinner.info("fetch existing team members from GitHub")
+    team = Team(github_organization, team_slug=github_team, github_token=github_token)
+    num_member = len(team.members.keys())
+    words = (
+        normal.txt("target team: ")
+        .kw(f"{github_team}")
+        .txt("( ")
+        .kw2(num_member)
+        .txt(" members) ")
+    )
+    spinner.succeed(words.to_str())
 
-        num_member = len(team.members.keys())
-        words = (
-            normal.txt("target team: ")
-            .kw(f"{github_team}")
-            .txt("( ")
-            .kw2(num_member)
-            .txt(" members) ")
-        )
-        spinner.info(words.to_str())
-
-    existed_members = set(team.members.keys())
+    if dry:
+        existed_members = set()
+    else:
+        existed_members = set(team.members.keys())
     outside_users = list(set(github_students) - existed_members)
 
     # print("Users to invite:")
     # print_table(outside_users, cols=5, wide=15)
 
+    spinner.info("Check valid Github users")
     invalid_id = []
-    with Halo() as spinner:
-        spinner.text = ""
-        # spinner.start()
-        total = len(outside_users)
-        for idx, u in enumerate(outside_users, start=1):
-            spinner.text = "{}/{} Check valid GitHub username : {}".format(idx, total, u)
-            if check_is_github_user(u, github_token) == False:
+    spinner.start()
+    total = len(outside_users)
+    for idx, u in enumerate(outside_users, start=1):
+        text = "" if not dry else "[skip]: "
+        text += f"{idx}/{total} Check valid GitHub username : {u}"
+        if dry:
+            spinner.succeed(text)
+        else:
+            if check_is_github_user(u, github_token):
+                spinner.succeed(text)
+            else:
+                spinner.fail(text)
                 invalid_id.append(u)
-        spinner.text = "{}/{} Check valid GitHub username".format(total, total)
-        spinner.succeed()
 
     if len(invalid_id) != 0:
         print("Find non-existed github user names:")
@@ -97,18 +110,15 @@ def add_students(student_handles, token, org, team):
 
     # membership info
     membership_infos = {key: "unknown" for key in non_member_valid_users}
-    with Halo() as spinner:
-        spinner.text = "Check Membership information"
-        spinner.start()
-        total = len(non_member_valid_users)
-        for idx, username in enumerate(non_member_valid_users, start=1):
-            spinner.text = "{}/{} Check Membership information : {}".format(
-                idx, total, username
-            )
+    total = len(non_member_valid_users)
+    spinner.info("Check Membership information")
+    for idx, username in enumerate(non_member_valid_users, start=1):
+        skip = "" if not dry else "[skip]: "
+        spinner.start(f"{skip}{idx}/{total}: {username}")
+        if not dry:
             res = team.get_memberships(username)
             if res.status_code == 200:
                 membership_infos[username] = res.json()["state"]
-        spinner.text = "{}/{} Check Membership information".format(total, total)
         spinner.succeed()
 
     pending_users = [
@@ -118,41 +128,41 @@ def add_students(student_handles, token, org, team):
         u for u in membership_infos.keys() if membership_infos[u] == "unknown"
     ]
 
-    print("Users already in pending state (total:{}):".format(len(pending_users)))
+    print(f"Users already in pending state (total:{len(pending_users)}):")
     print_table(pending_users)
 
-    print("Users to add (total: {})".format(len(no_memship_users)))
+    print(f"Users to add (total:{len(no_memship_users)})")
     print_table(no_memship_users)
+    print("-" * 30)
 
     failed_users = []
-    with Halo() as spinner:
-        for user_name in no_memship_users:
-            spinner.text = normal.txt("adding user: ").kw(user_name).to_str()
-            spinner.start()
-            res = team.add_user_to_team(user_name)
-            if res.status_code == 200:
-                spinner.succeed()
+    spinner.info("start to invite users")
+    for user_name in no_memship_users:
+        if dry:
+            spinner.info(f"[Skip] add user: {user_name}")
+        else:
+            if True == add_user(team, user_name=user_name):
+                spinner.succeed(f"add user: {user_name}")
             else:
                 failed_users.append(user_name)
-                spinner.text += (
-                    warn.txt(", return code:").kw(f" {res.status_code} ").to_str()
-                )
-                spinner.fail()
+                spinner.fail(f"failed to add user: {user_name}")
     failed_users = list(set(failed_users))
 
     if len(failed_users) != 0:
         print("Users failed to add")
         print_table(failed_users)
 
-    with Halo() as spinner:
-        spinner.text = "Adding students successfully"
-        spinner.info()
+    spinner.succeed("Adding students successfully")
+
+
+def add_user(team, user_name) -> bool:
+    res = team.add_user_to_team(user_name)
+    return res.status_code == 200
 
 
 def check_is_github_user(github_id, github_token) -> bool:
     res = requests.get(
-        "https://api.github.com/users/{}".format(github_id),
-        headers=github_headers(github_token),
+        f"https://api.github.com/users/{github_id}", headers=github_headers(github_token),
     )
     if res.status_code == 200:
         return True
