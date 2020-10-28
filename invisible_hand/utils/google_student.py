@@ -1,3 +1,4 @@
+import string
 from typing import Dict, List, Optional
 
 import pygsheets
@@ -81,15 +82,29 @@ class Gstudents:
         """Get student info from google sheet and do preliminary test"""
         records = self.actor.get_all_record(self.config["main_wks_title"])
         student_infos = []
+
+        def is_valid(word: str) -> bool:
+            """if the given word contains any printable character.
+            """
+            word = word.translate({ord(c): None for c in string.whitespace})
+            return len(word) > 0
+
         for record in records:
-            student_infos.append(
-                StudentInfo(
-                    student_id=record.get("student_id"),
-                    github_handle=record.get("github_handle"),
-                    name=record.get("name"),
-                    email=record.get("email"),
+            sid = record.get("student_id")
+            handle = record.get("github_handle")
+            name = record.get("name")
+            email = record.get("email")
+            if is_valid(sid) and is_valid(handle):
+                student_infos.append(
+                    StudentInfo(
+                        student_id=sid, github_handle=handle, name=name, email=email,
+                    )
                 )
-            )
+            elif is_valid(sid) or is_valid(handle):
+                fields: Dict[str, str] = self.config["main_wks_required_fields"]
+                uncomplete_record = {f: record.get(f) for f in fields}
+                # @todo: show warning using log
+                print(f"skip: uncomplete field - {uncomplete_record}")
         return student_infos
 
     def get_student_infos(self) -> List[StudentInfo]:
@@ -99,7 +114,7 @@ class Gstudents:
         """Return the student infos in dict"""
         result = []
         for s in self.student_infos:
-            result.append(dict(s.dict()))
+            result.append(dict(s))
         return result
 
     def get_student_info(self, student_id: str) -> Optional[StudentInfo]:
@@ -144,7 +159,7 @@ class Gstudents:
             if info.student_id not in ids:
                 ids.add(info.student_id)
             else:
-                errors.append(info.dict())
+                errors.append(dict(info))
         if len(errors) > 0:
             raise ERR_UNIQUE_STUDENT_ID(
                 explanation="Student ID should be unique, found:", instances=errors
