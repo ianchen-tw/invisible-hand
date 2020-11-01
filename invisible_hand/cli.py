@@ -12,10 +12,12 @@
 import typer
 
 from .scripts.add_students import add_students
+from .scripts.grant_read_access import grant_read_access
 
 app = typer.Typer(short_help="-h")
 
 app.command("add-student")(add_students)
+app.command("grant-read-access")(grant_read_access)
 
 # @click.group(
 #     invoke_without_command=True, context_settings=dict(help_option_names=["-h", "--help"])
