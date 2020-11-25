@@ -4,7 +4,10 @@ from typing import List, Tuple
 import requests
 import typer
 from halo import Halo
+from rich.columns import Columns
+from rich.panel import Panel
 
+from invisible_hand import console
 from ..config.github import config_add_students
 from ..core.color_text import normal, warn
 from ..ensures import ensure_gh_token
@@ -13,18 +16,11 @@ from ..utils.github_entities import Team
 from ..utils.github_scanner import github_headers
 
 
-def print_table(data, cols=5, wide=15, indent=2):
-    """Prints formatted data on columns of given width."""
-    n, r = divmod(len(data), cols)
-    pat = "{{:{}}}".format(wide)
-    line = "\n{}".format(" " * indent).join(pat * cols for _ in range(n))
-
-    # indent the first line
-    line = " " * indent + line
-
-    last_line = " " * indent + pat * r
-    print(line.format(*data))
-    print(last_line.format(*data[n * cols :]))
+def print_table(data):
+    """Prints formatted data in columns"""
+    users = [Panel(user, expand=True) for user in data]
+    columns = Columns(users, equal=True)
+    console.print(columns)
 
 
 # Use a "team slug"
@@ -127,7 +123,7 @@ def add_students(
     if len(invalid_handles) != 0:
         print("non-existed github user handles:")
         # control strings take space
-        print_table([warn.txt(i).to_str() for i in invalid_handles], cols=5, wide=25)
+        print_table([warn.txt(i).to_str() for i in invalid_handles])
     non_member_valid_users = list(set(outside_users) - set(invalid_handles))
 
     # membership info
@@ -135,6 +131,7 @@ def add_students(
     users_in_pending, users_to_invite = find_outside_members(
         non_member_valid_users, spinner=spinner, team=team, dry=dry
     )
+    spinner.succeed("Check Membership information")
 
     if len(users_in_pending) > 0:
         print(f"Users already in pending state (total:{len(users_in_pending)}):")
