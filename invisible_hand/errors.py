@@ -1,6 +1,6 @@
 from pprint import pformat
 from typing import Dict, List, Optional
-
+from invisible_hand import console
 from .core.color_text import warn
 from .urls import url_for_issue
 
@@ -31,28 +31,19 @@ class ERR_GIT_CREDENTIAL_HELPER_NOT_FOUND(Exception):
     def __init__(self):
         super().__init__(self)
 
-    def _get_git_cred_warning(self):
-        def ljust(word, leng):
-            return "{0:<{1}}".format(word, leng)
-
-        leng = 65
-        words = (
-            warn.newline()
-            .txt(ljust(" Not detect any credential helper inside git, use: ", leng))
-            .newline()
-            + warn.kw(
-                ljust("  git config --global credential.helper cache", leng)
-            ).newline()
-            + warn.txt(ljust(" before going any further.", leng)).newline()
-            + warn.txt(" Or see: ")
-            + warn.kw2(f" {url_for_issue(issue_num=8)}   ").newline()
-            + warn.txt(ljust(" for more information", leng))
-            + warn.newline()
-        )
-        return words.to_str()
-
     def __str__(self):
-        return self._get_git_cred_warning()
+        issue_git_cred = url_for_issue(issue_num=8)
+        with console.capture() as capture:
+            console.print()
+            console.print("[red]Not detect any credential helper inside git[/red], use:")
+            console.print(" [blue]git config --global credential.helper cache[/blue]")
+            console.print("before going any further.")
+            console.print("Or see:")
+            console.print(
+                f"  [link={issue_git_cred}][blue]{issue_git_cred}[/blue][/link]",
+            )
+            console.print("for more information")
+        return capture.get()
 
 
 class ERR_INVALID_GITHUB_TOKEN(Exception):
@@ -62,16 +53,9 @@ class ERR_INVALID_GITHUB_TOKEN(Exception):
         super().__init__(self, info)
 
     def __str__(self) -> str:
-        if self.token:
-            words = (
-                warn.newline()
-                + warn.txt(" Invalid Github token:").kw(f" {self.token} ").newline()
-                + warn.txt(" please update ").kw2("github_config.ini").newline()
-            )
-        else:
-            words = (
-                warn.newline()
-                + warn.txt(" Invalid Github token ").newline()
-                + warn.txt(" please update ").kw2("github_config.ini ").newline()
-            )
-        return str(words)
+        with console.capture() as capture:
+            console.print("\n")
+            console.print(f"Invalid Github token", end="")
+            console.print(f": [blue]{self.token}[/blue]" if self.token else "")
+            console.print("please update [blue]github_config.ini[/blue]")
+        return capture.get()
