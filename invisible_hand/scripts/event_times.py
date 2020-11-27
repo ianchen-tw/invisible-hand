@@ -8,16 +8,18 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from pprint import pprint
-from typing import List, NamedTuple, Tuple
+from typing import List, NamedTuple, Tuple, Optional
 
-# import argparse
-import click
+import typer
 import iso8601
 from halo import Halo
 from tabulate import tabulate
+from rich.table import Table
 
-from ..config.github import config_event_times, config_github
+from invisible_hand import console
+from ..config.github import config_event_times
 from ..ensures import ensure_gh_token
+from ..shared_options import opt_gh_org, opt_dry, opt_github_token
 from ..utils.github_entities import Team
 from ..utils.github_scanner import (
     LOCAL_TIMEZONE,
@@ -47,36 +49,56 @@ class GitHubRepoInfo(NamedTuple):
 
 
 # python3 github_event_times.py hw0-ianre657:cb75e99
+class RepoPrinter:
+    def __init__(
+        self, repos: List[GitHubRepoInfo], title: str = "Repos",
+    ):
+        self.repos = repos
+        self.title = title
+
+    def print(self):
+        table = Table(title=self.title)
+        table.add_column("Name", justify="right", style="cyan")
+        table.add_column("Commit Hash", justify="left")
+        for r in self.repos:
+            table.add_row(r.name, r.commit_hash)
+        console.print(table)
 
 
-@click.command()
-@click.argument("input-file")
-@click.option(
-    "--token", default=config_github["personal_access_token"], help="github access token"
-)
-@click.option("--org", default=config_github["organization"], show_default=True)
-@click.option(
-    "--deadline",
-    default=config_event_times["deadline"],
-    show_default=True,
-    help='deadline format: "yyyy-mm-dd" or any ISO8601 format string (timezone will be set to local timezone)',
-)
-@click.option("--target-team", default=None, help="specific team to operate on")
-def event_times(input_file, org, token, deadline, target_team):
+def event_times(
+    input_file: str = typer.Argument(
+        default=..., metavar="hw_path", help="file contains list of repo-hash"
+    ),
+    deadline: str = typer.Option(
+        config_event_times["deadline"],
+        "--deadline",
+        help="deadline format: 'yyyy-mm-dd' or any ISO8601 format string (timezone will be set to local timezone)",
+        show_default=True,
+    ),
+    target_team: Optional[str] = typer.Option(
+        default=None, help="specific team to operate on"
+    ),
+    dry: bool = opt_dry,
+    token: str = opt_github_token,
+    org: str = opt_gh_org,
+):
     """
-    input-file: file contains list of repo-hash.
+    Retrieve information about late submissions
 
-    repo-hash : string in <repo>:<hash> format
+    <repo-hash> : string in <repo>:<hash> format
             hw0-ianre657:cb75e99
     """
     global github_organization
     global github_token
 
+    console.log(f"parse input file : {input_file}")
     try:
         parsed_repos = get_repo_infos(input_file)
     except FileNotFoundError as e:
         print(str(e))
         return
+    RepoPrinter(parsed_repos).print()
+
     ensure_gh_token(token)
     spinner = Halo(stream=sys.stderr)
 
@@ -92,45 +114,56 @@ def event_times(input_file, org, token, deadline, target_team):
     success_group = []
     fail_group = []
     spinner.start("Start to check late submissions")
-
+    # sys.exit(0)
     # get team membershup info
+
+    target_repos: List[GitHubRepoInfo] = list(parsed_repos)
+
     if target_team is not None:
-        only_team_members = set(
+        # Filter repos
+        def get_handle(repo_name: str):
+            """
+                Deduce user handle from user name
+                example: hw2-nctulaoda -> nctulaoda
+            """
+            return re.sub("hw[\d]+-", "", repo_name)
+
+        target_team_members = set(
             Team(
-                org=github_organization, team_slug=target_team, github_token=github_token
+                org=github_organization,
+                team_slug=target_team,
+                github_token=github_token,
+                dry=dry,
             ).members.keys()
         )
+        if not dry:
+            target_repos = [
+                r for r in target_repos if get_handle(r) in target_team_members
+            ]
 
-    for idx, repo in enumerate(parsed_repos, start=1):
-        # print("get commit time for {}".format(repo))
-        if target_team is not None:
-            import re
-
-            user_id = re.sub("hw[\d]+-", "", repo.name)
-            # print(f'user_id :{user_id}')
-            if user_id not in only_team_members:
-                continue
+    for idx, repo in enumerate(target_repos, start=1):
         spinner.text = f"({idx}/{len(parsed_repos)}) Checking {repo.name}"
-        result = getRepoCommitTime(
+        if dry:
+            continue
+        result: Optional[commitInfo] = getCommitPushTime(
             org=github_organization, repo=repo.name, commit_hash=repo.commit_hash
         )
-        for r in result:
-            # print(r)
+        if result:
             passed, delta = is_deadline_passed(
-                submit_deadline, iso8601.parse_date(r.pushed_time)
+                submit_deadline, iso8601.parse_date(result.pushed_time)
             )
             if passed:
                 fail_group.append(
                     {
-                        "repo-name": r.repo,
-                        "commit-hash": r.commit_hash,
+                        "repo-name": result.repo,
+                        "commit-hash": result.commit_hash,
                         "time-passed": delta,
-                        "last-pushtime": r.pushed_time,
+                        "last-pushtime": result.pushed_time,
                     }
                 )
             else:
-                success_group.append((r, delta))
-                # print(f'{r}: {delta} later')
+                success_group.append((result, delta))
+
     spinner.succeed("Check finished")
     print("=" * 20, "REPORT", "=" * 20)
     print(f"Total submissions : {len(parsed_repos)}")
@@ -149,14 +182,14 @@ def get_repo_infos(filename: str) -> List[GitHubRepoInfo]:
     return result
 
 
-def getRepoCommitTime(org: str, repo: str, commit_hash: str) -> List[commitInfo]:
+def getCommitPushTime(org: str, repo: str, commit_hash: str) -> Optional[commitInfo]:
+    """Find the push-time of given commit-hash
+    """
     global github_token
     response = get_github_endpoint_paged_list(
         f"repos/{org}/{repo}/events", github_token, verbose=False
     )
     event_list = [x for x in response if x["type"] == "PushEvent"]
-    # find the localtiome of the given commit SHA that is pushed.
-    msgs = []
     for event in event_list:
         try:
             github_id = event["actor"]["login"]
@@ -177,13 +210,11 @@ def getRepoCommitTime(org: str, repo: str, commit_hash: str) -> List[commitInfo]
                 )  # only the first line if multiline
                 commit_hash = target_commit["sha"][0:7]
 
-                result = commitInfo(commit_hash, date, commit_message, repo)
-                # result_str = "{} sha:{}, msg:{}, date:{}".format(github_id, commit_hash, commit_message, date)
-                msgs.append(result)
+                return commitInfo(commit_hash, date, commit_message, repo)
         except KeyError:
             print("Error: malformed event!")
             pprint(event)
-    return msgs
+    return None
 
 
 # https://stackoverflow.com/questions/16259923/how-can-i-escape-latex-special-characters-inside-django-templates
@@ -215,7 +246,3 @@ def tex_escape(text: str) -> str:
         )
     )
     return regex.sub(lambda match: conv[match.group()], text)
-
-
-if __name__ == "__main__":
-    event_times()
