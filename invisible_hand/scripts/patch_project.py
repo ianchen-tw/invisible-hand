@@ -7,14 +7,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
 
-import click
+import typer
 import requests
 from git import Repo
 from git.objects.commit import Commit
 from halo import Halo
 
 from invisible_hand.ensures import ensure_gh_token, ensure_git_cached
-from ..config.github import config_github
+from ..shared_options import opt_gh_org, opt_github_token
 from ..core.color_text import normal, warn
 from ..utils.github_scanner import (
     get_github_endpoint_paged_list,
@@ -26,29 +26,29 @@ from ..utils.github_scanner import (
 # as patch_branch to be the content
 
 
-@click.command()
-@click.argument("hw-prefix")
-@click.argument("patch-branch")
-@click.option("--source-repo", default="", help="default to tmpl-{hw-prefix}-revise")
-@click.option(
-    "--token", default=config_github["personal_access_token"], help="github access token"
-)
-@click.option("--org", default=config_github["organization"], show_default=True)
-@click.option("--only-repo", nargs=1, help="only repo to patch")
-@click.option(
-    "--dry",
-    help="dry run, do not publish result to the remote",
-    is_flag=True,
-    default=False,
-)
-def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo, dry):
+def patch_project(
+    hw_prefix: str = typer.Argument(default=..., help="prefix of the homework title"),
+    patch_branch: str = typer.Argument(
+        default=..., help="source bracnch to patch to the main branch"
+    ),
+    source_repo: Optional[str] = typer.Option(
+        default=None, help="default to tmpl-{hw-prefix}-revise"
+    ),
+    only_repo: Optional[str] = typer.Option(default=None, help="only repo to patch"),
+    dry: bool = typer.Option(
+        False, "--dry", help="dry run, do not publish result to the remote"
+    ),
+    token: str = opt_github_token,
+    org: str = opt_gh_org,
+):
     """Patch to student homeworks"""
+
     ensure_git_cached()
     ensure_gh_token(token)
     # init
     spinner = Halo(stream=sys.stderr)
 
-    if source_repo == "":
+    if not source_repo:
         source_repo = f"tmpl-{hw_prefix}-revise"
 
     # Check if repo already contains the patched branch. Skip if so.
