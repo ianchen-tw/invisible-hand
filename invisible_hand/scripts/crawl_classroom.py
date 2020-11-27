@@ -4,8 +4,9 @@ import os
 import shutil
 import sys
 from pathlib import Path
+from typing import Optional
 
-import click
+import typer
 from bs4 import BeautifulSoup
 from halo import Halo
 from selenium import webdriver
@@ -51,17 +52,18 @@ class Condition_logined:
 BaseURL = "https://classroom.github.com"
 
 
-@click.command()
-@click.argument("hw_title")
-@click.argument("output")
-@click.option("--login", default=config_crawl_classroom["login"], show_default=True)
-@click.option("--passwd")
-@click.option(
-    "--classroom_id", default=config_crawl_classroom["classroom_id"], show_default=True
-)
-def crawl_classroom(hw_title, login, passwd, classroom_id, output):
+def crawl_classroom(
+    hw_title=typer.Argument(..., help="homework submission to crawl"),
+    output: str = typer.Argument(..., help="filename to output your resule"),
+    classroom_id: str = typer.Argument(
+        default=config_crawl_classroom["classroom_id"], show_default=True
+    ),
+    login: str = typer.Option(default=config_crawl_classroom["login"], show_default=True),
+    passwd: Optional[str] = typer.Option(
+        default=None, help="password for your github classroom"
+    ),
+):
     """Get student homework submitted version from github classroom
-    @output :filename to output your result
     """
     spinner.start()
     if output is not None:
