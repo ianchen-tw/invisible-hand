@@ -10,12 +10,13 @@ from pprint import pprint
 from time import time
 from typing import Dict, List, Optional
 
-import click
+import typer
 import httpx
 import trio
 from halo import Halo
 
-from ..config.github import config_announce_grade, config_github
+from ..shared_options import opt_gh_org, opt_github_token
+from ..config.github import config_announce_grade
 from ..core.color_text import normal
 from ..ensures import ensure_gh_token
 from ..utils.github_scanner import get_github_endpoint_paged_list_async
@@ -38,25 +39,18 @@ def measure_time(f):
     return wrap
 
 
-@click.command()
-@click.argument("homework_prefix")
-@click.option(
-    "--token", default=config_github["personal_access_token"], help="github access token"
-)
-@click.option(
-    "--dry",
-    help="dry run, do not publish result to the remote",
-    is_flag=True,
-    default=False,
-)
-@click.option("--org", default=config_github["organization"], show_default=True)
-@click.option("--only-id", nargs=1, help="only id to announce")
-@click.option(
-    "--feedback-source-repo",
-    default=config_announce_grade["feedback_source_repo"],
-    show_default=True,
-)
-def announce_grade(homework_prefix, token, dry, org, only_id, feedback_source_repo):
+def announce_grade(
+    homework_prefix: str = typer.Argument(..., help="prefix of the target homework"),
+    feedback_source_repo: str = typer.Argument(
+        default=config_announce_grade["feedback_source_repo"], show_default=True
+    ),
+    only_id: Optional[str] = typer.Option(default=None, help="only id to announce"),
+    token: str = opt_github_token,
+    org: str = opt_gh_org,
+    dry: str = typer.Option(
+        False, "--dry", help="dry run, do not publish result to the remote"
+    ),
+):
     """announce student grades to each hw repo"""
 
     ensure_gh_token(token)
