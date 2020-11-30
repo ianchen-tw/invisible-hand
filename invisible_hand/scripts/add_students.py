@@ -8,8 +8,8 @@ from rich.columns import Columns
 from rich.panel import Panel
 
 from invisible_hand import console
+from ..core.console_color import kw, kw2
 from ..config.github import config_add_students
-from ..core.color_text import normal, warn
 from ..ensures import ensure_gh_token
 from ..shared_options import opt_dry, opt_gh_org, opt_github_token
 from ..utils.github_entities import Team
@@ -104,14 +104,10 @@ def add_students(
         github_token=github_token,
     )
     num_member = len(team.members.keys())
-    words = (
-        normal.txt("target team: ")
-        .kw(f"{github_team}")
-        .txt("( ")
-        .kw2(num_member)
-        .txt(" members) ")
-    )
-    spinner.succeed(words.to_str())
+
+    with console.capture() as capture:
+        console.print(f" target team: {kw(github_team)} ({kw2(num_member)} members) ",)
+    spinner.succeed(capture.get())
 
     existed_members = set(team.members.keys())
     outside_users = list(set(github_students) - existed_members)
@@ -123,7 +119,7 @@ def add_students(
     if len(invalid_handles) != 0:
         print("non-existed github user handles:")
         # control strings take space
-        print_table([warn.txt(i).to_str() for i in invalid_handles])
+        print_table(invalid_handles)
     non_member_valid_users = list(set(outside_users) - set(invalid_handles))
 
     # membership info

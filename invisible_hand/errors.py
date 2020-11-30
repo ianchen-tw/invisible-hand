@@ -1,7 +1,7 @@
 from pprint import pformat
 from typing import Dict, List, Optional
 from invisible_hand import console
-from .core.color_text import warn
+from .core.console_color import kw, danger
 from .urls import url_for_issue
 
 
@@ -49,7 +49,7 @@ class ERR_GIT_CREDENTIAL_HELPER_NOT_FOUND(Exception):
 class ERR_INVALID_GITHUB_TOKEN(Exception):
     def __init__(self, token: Optional[str] = None):
         self.token = token
-        info = "Invalud token" + f": {token}" if token else ""
+        info = "Invalid token" + f": {token}" if token else ""
         super().__init__(self, info)
 
     def __str__(self) -> str:
@@ -59,3 +59,20 @@ class ERR_INVALID_GITHUB_TOKEN(Exception):
             console.print(f": [blue]{self.token}[/blue]" if self.token else "")
             console.print("please update [blue]github_config.ini[/blue]")
         return capture.get()
+
+
+class ERR_CANNOT_FETCH_TEAM(Exception):
+    def __init__(self, org: str, team_slug: str):
+        self.org = org
+        self.team = team_slug
+        super().__init__(self, f"cannot fetch team: {self.org}/{self.team}")
+
+    def __str__(self) -> str:
+        with console.capture() as capture:
+            console.print("\n")
+            console.print(danger("Cannot fetch team id"))
+            console.print("Team info :")
+            console.print(f"     org : {kw(self.org)}")
+            console.print(f"     team_slug: {kw(self.team)}")
+        return capture.get()
+

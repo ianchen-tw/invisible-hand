@@ -6,6 +6,7 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
+from requests.api import patch
 
 import typer
 import requests
@@ -15,7 +16,8 @@ from halo import Halo
 
 from invisible_hand.ensures import ensure_gh_token, ensure_git_cached
 from ..shared_options import opt_gh_org, opt_github_token
-from ..core.color_text import normal, warn
+from ..core.console_color import kw, safe, danger
+from invisible_hand import console_txt, console
 from ..utils.github_scanner import (
     get_github_endpoint_paged_list,
     github_headers,
@@ -69,11 +71,7 @@ def patch_project(
     spinner.info("delete dated folder")
 
     spinner.start(
-        normal.txt("Fetch issue template")
-        .kw(patch_branch)
-        .txt(" from ")
-        .kw(source_repo)
-        .to_str()
+        console_txt(f"Fetch issue template {kw(patch_branch)} from {kw(source_repo)}")
     )
     # Fetch patch template on the source repo
     issues = get_github_endpoint_paged_list(
@@ -101,10 +99,8 @@ def patch_project(
         )
     )
 
-    spinner.succeed(normal.txt("Create tmp folder ").kw(root_folder).to_str())
-    spinner.info(
-        normal.txt("Fetch soure repo").kw(source_repo).txt(" from GitHub ").to_str()
-    )
+    spinner.succeed(console_txt(f"Create tmp folder: {kw(root_folder)}"))
+    spinner.info(console_txt(f"Fetch source repo {kw(source_repo)} from Github"))
     src_repo_path = root_folder / "source_repo"
     sp.run(
         [
@@ -145,7 +141,7 @@ def patch_project(
         ]
         repo = next(iter(repos), None)
         if repo:
-            spinner.info(normal.txt("Only patch to repo : ").kw(repo["name"]).to_str())
+            spinner.info(console_txt(f"Only patch to repo : " + kw(repo["name"])))
         repos = [repo]
     else:
         repos = query_matching_repos(
@@ -157,9 +153,7 @@ def patch_project(
     student_path = root_folder / "student_repos"
     student_path.mkdir()
     for repo_idx, r in enumerate(repos, start=1):
-        pre_prompt_str = (
-            normal.txt(f"({repo_idx}/{len(repos)})").kw(f" {r['name']} ").to_str()
-        )
+        pre_prompt_str = console_txt(f"({repo_idx}/{len(repos)}) " + kw(r["name"]))
         spinner.start()
 
         # Check if repo already contains the patched branch. Skip if so.
@@ -169,13 +163,14 @@ def patch_project(
             headers=github_headers(token),
         )
         if res.status_code == 200:  # this branch exists in the remote
-            spinner.text = (
-                pre_prompt_str + normal.kw("  Skip  ").txt("already patched ").to_str()
+            spinner.text = pre_prompt_str + console_txt(
+                safe(" Skip ") + " already patched"
             )
             spinner.succeed()
             continue
 
-        spinner.text = pre_prompt_str + normal.txt(" cloning repo...").to_str()
+        spinner.text = pre_prompt_str + "cloning repo"
+
         sp.run(
             ["git", "clone", "--depth=1", r["html_url"]],
             cwd=student_path,
@@ -215,8 +210,8 @@ def patch_project(
         # Pass if no changed
         student_repo = Repo(student_path / hw_repo_name)
         if len(student_repo.index.diff("HEAD")) == 0:
-            spinner.text = (
-                pre_prompt_str + normal.kw2("  Passed  ").txt("Repo no change").to_str()
+            spinner.text = pre_prompt_str + console_txt(
+                safe(" Passed ") + " no changes in repo"
             )
             spinner.succeed()
             continue
@@ -228,9 +223,9 @@ def patch_project(
             stderr=sp.DEVNULL,
         )
 
-        spinner.text = pre_prompt_str + normal.kw(" publish patch to remote...").to_str()
+        spinner.text = pre_prompt_str + console_txt(kw(" publish patch to remote..."))
         if dry:
-            spinner.succeed(pre_prompt_str + normal.txt(" Patched ").to_str())
+            spinner.succeed(pre_prompt_str + console_txt(safe(" Patched ")))
             continue
         res = sp.run(
             ["git", "push", "-u", "origin", patch_branch],
@@ -239,15 +234,13 @@ def patch_project(
             stderr=sp.DEVNULL,
         )
         if res.returncode != 0:
-            spinner.text = (
+            spinner.fail(
                 pre_prompt_str
-                + warn.kw("  Failed  ")
-                + warn.txt(" Cannot push branch ")
-                .kw2(patch_branch)
-                .txt(" to origin")
-                .to_str()
+                + console_txt(
+                    danger("  Failed  ")
+                    + f"Cannot push branch {kw(patch_branch)} to_origin"
+                )
             )
-            spinner.fail()
             continue
 
         # open an pull-request on students repo
@@ -264,21 +257,18 @@ def patch_project(
             json=body,
         )
         if res.status_code == 201:
-            spinner.text = pre_prompt_str + normal.txt(" Patched ").to_str()
+            spinner.text = pre_prompt_str + console_txt(safe(" Patched "))
             spinner.succeed()
         else:
-            spinner.text = (
+            spinner.fail(
                 pre_prompt_str
-                + warn.kw("  Failed  ")
-                + warn.txt("Cannot create PR")
-                .kw2(patch_branch)
-                .txt("to origin/master")
-                .to_str()
+                + console_txt(
+                    danger("  Failed  ")
+                    + f"Cannot create PR {kw(patch_branch)} to origin/master"
+                )
             )
-            spinner.fail()
             try:
-                info = warn.txt("    ").txt(res.json()["errors"][0]["message"]).to_str()
-                print(info)
+                console.print(res.json()["errors"][0]["message"])
             except:
                 pass
             continue

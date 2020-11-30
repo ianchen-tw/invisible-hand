@@ -15,9 +15,10 @@ import httpx
 import trio
 from halo import Halo
 
+from invisible_hand import console_txt
+from ..core.console_color import kw
 from ..shared_options import opt_gh_org, opt_github_token
 from ..config.github import config_announce_grade
-from ..core.color_text import normal
 from ..ensures import ensure_gh_token
 from ..utils.github_scanner import get_github_endpoint_paged_list_async
 from ..utils.google_student import Gstudents
@@ -75,7 +76,7 @@ def announce_grade(
             dir=".",
         )
     )
-    spinner.succeed(normal.txt("Create tmp folder ").kw(root_folder).to_str())
+    spinner.succeed("Create tmp folder " + console_txt(kw(root_folder)))
 
     feedback_repo_path = root_folder / "feedbacks"
 

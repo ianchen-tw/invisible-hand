@@ -6,7 +6,8 @@ import requests
 from requests.models import Response
 
 from ..config.github import config_github
-from ..core.color_text import warn
+
+from invisible_hand.errors import ERR_CANNOT_FETCH_TEAM
 from .github_scanner import (
     get_github_endpoint,
     get_github_endpoint_paged_list,
@@ -116,8 +117,7 @@ class Team:
                 verbose=False,
             )
         except:
-            prompt_cannot_fetch_team(org=self.org, team_slug=self.team_slug)
-            sys.exit(1)
+            raise ERR_CANNOT_FETCH_TEAM(org=self.org, team_slug=self.team_slug)
         for user in res:
             self.members[user["login"]] = user
         # print(res)
@@ -129,16 +129,9 @@ class Team:
                 config_github["personal_access_token"],
             )
         except:
-            prompt_cannot_fetch_team(org=self.org, team_slug=self.team_slug)
+            raise ERR_CANNOT_FETCH_TEAM(org=self.org, team_slug=self.team_slug)
             sys.exit(1)
         self.id = result["id"]
-
-
-def prompt_cannot_fetch_team(org: str, team_slug: str):
-    print(warn.txt("Cannot fetch team id").to_str)
-    print("Team info:")
-    print(f"    org: {org}")
-    print(f"    team_slug: {team_slug}")
 
 
 if __name__ == "__main__":
