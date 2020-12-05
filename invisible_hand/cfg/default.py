@@ -29,6 +29,8 @@ def add_commented_section(
                     elif v.get("comments"):
                         for c in v["comments"]:
                             t.add(comment(c))
+                    else:
+                        raise _ERR_NON_VAILD_DEFAULT_CFG
                     t.add(k, v["value"])
                     t.add(nl())
                 else:
