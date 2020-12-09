@@ -2,6 +2,8 @@ from typing import Dict, Optional
 
 from tomlkit import comment, document, dumps, nl, table
 
+from .base_config import Config
+
 
 class _ERR_NON_VAILD_DEFAULT_CFG(Exception):
     """ Internal use,
@@ -45,9 +47,10 @@ def add_commented_section(
     docu.add(section_name, build_table())
 
 
-def create_default_config() -> str:
+def export_default_config() -> str:
     """ Generate the default config file
     """
+    default_cfg = Config.get_default()
     docu = document()
     docu.add(comment("Config file for invisible-hand"))
     docu.add(comment("each section define the corresponding default config for scripts"))
@@ -61,7 +64,7 @@ def create_default_config() -> str:
                     "Your GitHub API token here, inside the quotation marks",
                     "https://github.com/blog/1509-personal-api-tokens",
                 ],
-                "value": "your-github-personal-access-token",
+                "value": default_cfg.github.personal_access_token,
             },
         },
     )
@@ -70,36 +73,45 @@ def create_default_config() -> str:
         docu=docu,
         section_name="google_spreadsheet",
         dic={
-            "spreadsheet_url": "your-spreadsheet-id",
-            "cred_filename": "client_secret.json",
+            "spreadsheet_url": default_cfg.google_spreadsheet.spreadsheet_url,
+            "cred_filename": default_cfg.google_spreadsheet.cred_filename,
         },
     )
 
     add_commented_section(
         docu=docu,
         section_name="crawl_classroom",
-        dic={"login": "your-github-id", "classroom_id": "classroom-id-in-url"},
+        dic={
+            "login": default_cfg.crawl_classroom.login,
+            "classroom_id": default_cfg.crawl_classroom.classroom_id,
+        },
     )
+
     add_commented_section(
         docu=docu,
         section_name="grant_read_access",
-        dic={"reader_team_slug": "2020-teaching-team",},
+        dic={"reader_team_slug": default_cfg.grant_read_access.reader_team_slug,},
     )
 
     add_commented_section(
-        docu=docu, section_name="add_students", dic={"default_team_slug": "2020-students"}
+        docu=docu,
+        section_name="add_students",
+        dic={"default_team_slug": default_cfg.add_students.default_team_slug},
     )
 
     add_commented_section(
-        docu=docu, section_name="event_times", dic={"deadline": "2019-11-12 23:59:59"}
+        docu=docu,
+        section_name="event_times",
+        dic={"deadline": default_cfg.event_times.deadline},
     )
+
     add_commented_section(
         docu=docu,
         section_name="announce_grade",
         dic={
             "feedback_source_repo": {
                 "comment": "You're not supposed to change this variable",
-                "value": "Hw-manager",
+                "value": default_cfg.announce_grade.feedback_source_repo,
             }
         },
     )
