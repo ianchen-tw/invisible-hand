@@ -8,24 +8,24 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from pprint import pprint
-from typing import List, NamedTuple, Tuple, Optional
+from typing import List, NamedTuple, Optional, Tuple
 
-import typer
 import iso8601
+import typer
 from halo import Halo
-from tabulate import tabulate
+from rich.console import Console
 from rich.table import Table
+from tabulate import tabulate
 
-from invisible_hand import console
-from ..config.github import config_event_times
-from ..ensures import ensure_gh_token
-from ..shared_options import opt_gh_org, opt_dry, opt_github_token
+from invisible_hand.config import app_context
+from ..ensures import ensure_config_exists, ensure_gh_token
 from ..utils.github_entities import Team
 from ..utils.github_scanner import (
     LOCAL_TIMEZONE,
     get_github_endpoint_paged_list,
     localtime_from_iso_datestr,
 )
+from .shared_options import opt_dry, opt_gh_org, opt_github_token
 
 
 def is_deadline_passed(dl: datetime, submit: datetime) -> Tuple[bool, timedelta]:
@@ -62,7 +62,7 @@ class RepoPrinter:
         table.add_column("Commit Hash", justify="left")
         for r in self.repos:
             table.add_row(r.name, r.commit_hash)
-        console.print(table)
+        Console().print(table)
 
 
 def event_times(
@@ -70,17 +70,16 @@ def event_times(
         default=..., metavar="hw_path", help="file contains list of repo-hash"
     ),
     deadline: str = typer.Option(
-        config_event_times["deadline"],
+        None,
         "--deadline",
         help="deadline format: 'yyyy-mm-dd' or any ISO8601 format string (timezone will be set to local timezone)",
-        show_default=True,
     ),
     target_team: Optional[str] = typer.Option(
         default=None, help="specific team to operate on"
     ),
     dry: bool = opt_dry,
-    token: str = opt_github_token,
-    org: str = opt_gh_org,
+    token: Optional[str] = opt_github_token,
+    org: Optional[str] = opt_gh_org,
 ):
     """
     Retrieve information about late submissions
@@ -88,10 +87,20 @@ def event_times(
     <repo-hash> : string in <repo>:<hash> format
             hw0-ianre657:cb75e99
     """
+    ensure_config_exists()
+
+    def fallback(val, fallback_value):
+        return val if val else fallback_value
+
+    # Handle default value manually because we'll change our config after app starts up
+    deadline: str = fallback(deadline, app_context.config.event_times.deadline)
+    token: str = fallback(token, app_context.config.github.personal_access_token)
+    org: str = fallback(org, app_context.config.github.organization)
+
     global github_organization
     global github_token
 
-    console.log(f"parse input file : {input_file}")
+    typer.echo(f"parse input file : {input_file}")
     try:
         parsed_repos = get_repo_infos(input_file)
     except FileNotFoundError as e:

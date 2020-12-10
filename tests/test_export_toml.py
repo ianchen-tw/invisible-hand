@@ -1,8 +1,12 @@
 import pytest
 from tomlkit import document, loads
 
-from .export_toml import *
-from .export_toml import _ERR_NON_VAILD_DEFAULT_CFG, Config
+from invisible_hand.config.export_toml import (
+    _ERR_NON_VAILD_DEFAULT_CFG,
+    Config,
+    add_commented_section,
+    export_default_config,
+)
 
 
 @pytest.mark.unit

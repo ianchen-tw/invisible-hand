@@ -1,26 +1,25 @@
 import sys
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import requests
 import typer
 from halo import Halo
 from rich.columns import Columns
+from rich.console import Console
 from rich.panel import Panel
 
-from invisible_hand import console
-from ..core.console_color import kw, kw2
-from ..config.github import config_add_students
-from ..ensures import ensure_gh_token
-from ..shared_options import opt_dry, opt_gh_org, opt_github_token
+from invisible_hand.config import app_context
+from ..ensures import ensure_config_exists, ensure_gh_token
 from ..utils.github_entities import Team
 from ..utils.github_scanner import github_headers
+from .shared_options import opt_all_yes, opt_dry, opt_gh_org, opt_github_token
 
 
 def print_table(data):
     """Prints formatted data in columns"""
     users = [Panel(user, expand=True) for user in data]
     columns = Columns(users, equal=True)
-    console.print(columns)
+    Console().print(columns)
 
 
 # Use a "team slug"
@@ -72,22 +71,37 @@ class SafetyActor:
 
 def add_students(
     github_students: List[str] = typer.Argument(
-        metavar="✏️ student_handles✏️",
+        metavar="student_handles",
         default=...,
         help="list of student handles separated by white space",
     ),
-    github_team: str = typer.Option(
-        config_add_students["default_team_slug"],
-        "--team",
-        help="invite to the specfic team under organization",
+    github_team: Optional[str] = typer.Option(
+        None, "--team", help="invite to the specfic team under organization",
     ),
+    yes: bool = opt_all_yes,
     dry: bool = opt_dry,
-    github_token: str = opt_github_token,
-    github_organization: str = opt_gh_org,
+    github_token: Optional[str] = opt_github_token,
+    github_organization: Optional[str] = opt_gh_org,
 ):
     """
-    invite students to join our Github organization
+    Invite students to join our Github organization
     """
+    ensure_config_exists()
+
+    def fallback(val, fallback_value):
+        return val if val else fallback_value
+
+    # Handle default value manually because we'll change our config after app starts up
+    github_token: str = fallback(
+        github_token, app_context.config.github.personal_access_token
+    )
+    github_organization: str = fallback(
+        github_organization, app_context.config.github.organization
+    )
+    github_team: str = fallback(
+        github_team, app_context.config.add_students.default_team_slug
+    )
+
     safety = SafetyActor(dry=dry)
     safety.ensure_gh_token(github_token)
 
@@ -95,6 +109,11 @@ def add_students(
     spinner = Halo(stream=sys.stderr)
     if dry:
         spinner.info("Dry run")
+
+    if not (
+        yes or typer.confirm(f"Add students to {github_organization}/{github_team}?")
+    ):
+        raise typer.Abort()
 
     spinner.info("fetch existing team members from GitHub")
     team = Team(
@@ -105,9 +124,7 @@ def add_students(
     )
     num_member = len(team.members.keys())
 
-    with console.capture() as capture:
-        console.print(f" target team: {kw(github_team)} ({kw2(num_member)} members) ",)
-    spinner.succeed(capture.get())
+    spinner.succeed(f" target team: {github_team} ({num_member} members) ")
 
     existed_members = set(team.members.keys())
     outside_users = list(set(github_students) - existed_members)

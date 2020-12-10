@@ -1,8 +1,6 @@
-from rich.theme import Theme
-
-custom_theme = Theme(
-    {"keyword": "bold magenta", "keyword2": "bold red", "safe": "green", "danger": "red"}
-)
+# custom_theme = Theme(
+#     {"keyword": "bold magenta", "keyword2": "bold red", "safe": "green", "danger": "red"}
+# )
 
 
 def kw(text: str):
@@ -19,3 +17,7 @@ def safe(text: str):
 
 def danger(text: str):
     return f"[danger]{text}[/]"
+
+
+# def get_console():
+#     return Console(theme=custom_theme)

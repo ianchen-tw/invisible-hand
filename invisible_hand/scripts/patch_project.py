@@ -6,23 +6,25 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
-from requests.api import patch
 
-import typer
 import requests
+import typer
 from git import Repo
 from git.objects.commit import Commit
 from halo import Halo
 
-from invisible_hand.ensures import ensure_gh_token, ensure_git_cached
-from ..shared_options import opt_gh_org, opt_github_token
-from ..core.console_color import kw, safe, danger
-from invisible_hand import console_txt, console
+from invisible_hand.config import app_context
+from invisible_hand.ensures import (
+    ensure_config_exists,
+    ensure_gh_token,
+    ensure_git_cached,
+)
 from ..utils.github_scanner import (
     get_github_endpoint_paged_list,
     github_headers,
     query_matching_repos,
 )
+from .shared_options import opt_all_yes, opt_gh_org, opt_github_token
 
 # The Pull request we made would fetch the first issue which has the same title
 # as patch_branch to be the content
@@ -40,13 +42,27 @@ def patch_project(
     dry: bool = typer.Option(
         False, "--dry", help="dry run, do not publish result to the remote"
     ),
+    yes: bool = opt_all_yes,
     token: str = opt_github_token,
     org: str = opt_gh_org,
 ):
     """Patch to student homeworks"""
+    ensure_config_exists()
+
+    def fallback(val, fallback_value):
+        return val if val else fallback_value
+
+    # Handle default value manually because we'll change our config after app starts up
+    token: str = fallback(token, app_context.config.github.personal_access_token)
+    org: str = fallback(org, app_context.config.github.organization)
 
     ensure_git_cached()
     ensure_gh_token(token)
+
+    if not (
+        yes or typer.confirm(f"Patch homework:{hw_prefix} from branch:{patch_branch}?")
+    ):
+        raise typer.Abort()
     # init
     spinner = Halo(stream=sys.stderr)
 
@@ -70,9 +86,7 @@ def patch_project(
         shutil.rmtree(d)
     spinner.info("delete dated folder")
 
-    spinner.start(
-        console_txt(f"Fetch issue template {kw(patch_branch)} from {kw(source_repo)}")
-    )
+    spinner.start(f"Fetch issue template {patch_branch} from {source_repo}")
     # Fetch patch template on the source repo
     issues = get_github_endpoint_paged_list(
         endpoint=f"repos/{org}/{source_repo}/issues", github_token=token, verbose=False
@@ -99,8 +113,8 @@ def patch_project(
         )
     )
 
-    spinner.succeed(console_txt(f"Create tmp folder: {kw(root_folder)}"))
-    spinner.info(console_txt(f"Fetch source repo {kw(source_repo)} from Github"))
+    spinner.succeed(f"Create tmp folder: {root_folder}")
+    spinner.info(f"Fetch source repo {source_repo} from Github")
     src_repo_path = root_folder / "source_repo"
     sp.run(
         [
@@ -141,7 +155,7 @@ def patch_project(
         ]
         repo = next(iter(repos), None)
         if repo:
-            spinner.info(console_txt(f"Only patch to repo : " + kw(repo["name"])))
+            spinner.info("Only patch to repo : " + repo["name"])
         repos = [repo]
     else:
         repos = query_matching_repos(
@@ -153,7 +167,7 @@ def patch_project(
     student_path = root_folder / "student_repos"
     student_path.mkdir()
     for repo_idx, r in enumerate(repos, start=1):
-        pre_prompt_str = console_txt(f"({repo_idx}/{len(repos)}) " + kw(r["name"]))
+        pre_prompt_str = f"({repo_idx}/{len(repos)}) " + r["name"]
         spinner.start()
 
         # Check if repo already contains the patched branch. Skip if so.
@@ -163,9 +177,8 @@ def patch_project(
             headers=github_headers(token),
         )
         if res.status_code == 200:  # this branch exists in the remote
-            spinner.text = pre_prompt_str + console_txt(
-                safe(" Skip ") + " already patched"
-            )
+            spinner.text = pre_prompt_str + " Skip " + " already patched"
+
             spinner.succeed()
             continue
 
@@ -210,9 +223,8 @@ def patch_project(
         # Pass if no changed
         student_repo = Repo(student_path / hw_repo_name)
         if len(student_repo.index.diff("HEAD")) == 0:
-            spinner.text = pre_prompt_str + console_txt(
-                safe(" Passed ") + " no changes in repo"
-            )
+            spinner.text = pre_prompt_str + " Passed " + " no changes in repo"
+
             spinner.succeed()
             continue
 
@@ -223,9 +235,9 @@ def patch_project(
             stderr=sp.DEVNULL,
         )
 
-        spinner.text = pre_prompt_str + console_txt(kw(" publish patch to remote..."))
+        spinner.text = pre_prompt_str + " publish patch to remote..."
         if dry:
-            spinner.succeed(pre_prompt_str + console_txt(safe(" Patched ")))
+            spinner.succeed(pre_prompt_str + " Patched ")
             continue
         res = sp.run(
             ["git", "push", "-u", "origin", patch_branch],
@@ -236,10 +248,8 @@ def patch_project(
         if res.returncode != 0:
             spinner.fail(
                 pre_prompt_str
-                + console_txt(
-                    danger("  Failed  ")
-                    + f"Cannot push branch {kw(patch_branch)} to_origin"
-                )
+                + "  Failed  "
+                + f"Cannot push branch {patch_branch} to_origin"
             )
             continue
 
@@ -257,18 +267,15 @@ def patch_project(
             json=body,
         )
         if res.status_code == 201:
-            spinner.text = pre_prompt_str + console_txt(safe(" Patched "))
-            spinner.succeed()
+            spinner.succeed(f"{pre_prompt_str} Patched ")
         else:
             spinner.fail(
                 pre_prompt_str
-                + console_txt(
-                    danger("  Failed  ")
-                    + f"Cannot create PR {kw(patch_branch)} to origin/master"
-                )
+                + "  Failed  "
+                + f"Cannot create PR {patch_branch} to origin/master"
             )
             try:
-                console.print(res.json()["errors"][0]["message"])
+                print(res.json()["errors"][0]["message"])
             except:
                 pass
             continue

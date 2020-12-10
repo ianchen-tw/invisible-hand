@@ -8,6 +8,7 @@ class Config(BaseModel):
 
     class Github(BaseModel):
         personal_access_token: str
+        organization: str
 
     class Google(BaseModel):
         spreadsheet_url: str
@@ -41,7 +42,8 @@ class Config(BaseModel):
     def get_default():
         return Config(
             github=Config.Github(
-                personal_access_token="your-github-personal-access-token"
+                personal_access_token="your-github-personal-access-token",
+                organization="compiler-s20",
             ),
             google_spreadsheet=Config.Google(
                 spreadsheet_url="your-spreadsheet-id", cred_filename="client_secret.json"

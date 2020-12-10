@@ -10,18 +10,16 @@ from pprint import pprint
 from time import time
 from typing import Dict, List, Optional
 
-import typer
 import httpx
 import trio
+import typer
 from halo import Halo
 
-from invisible_hand import console_txt
-from ..core.console_color import kw
-from ..shared_options import opt_gh_org, opt_github_token
-from ..config.github import config_announce_grade
-from ..ensures import ensure_gh_token
+from invisible_hand.config import app_context
+from ..ensures import ensure_config_exists, ensure_gh_token
 from ..utils.github_scanner import get_github_endpoint_paged_list_async
 from ..utils.google_student import Gstudents
+from .shared_options import opt_all_yes, opt_gh_org, opt_github_token
 
 # We will use {source_repo}/{source_tmpl_issue} as the template to give students feedback
 
@@ -42,19 +40,34 @@ def measure_time(f):
 
 def announce_grade(
     homework_prefix: str = typer.Argument(..., help="prefix of the target homework"),
-    feedback_source_repo: str = typer.Argument(
-        default=config_announce_grade["feedback_source_repo"], show_default=True
+    feedback_source_repo: Optional[str] = typer.Option(
+        None, show_default=True, help="Repo contains students' feedbacks"
     ),
     only_id: Optional[str] = typer.Option(default=None, help="only id to announce"),
-    token: str = opt_github_token,
+    token: Optional[str] = opt_github_token,
     org: str = opt_gh_org,
     dry: str = typer.Option(
         False, "--dry", help="dry run, do not publish result to the remote"
     ),
+    yes: bool = opt_all_yes,
 ):
-    """announce student grades to each hw repo"""
+    """Announce student grades to each hw repo"""
+    ensure_config_exists()
+
+    def fallback(val, fallback_value):
+        return val if val else fallback_value
+
+    # Handle default value manually because we'll change our config after app starts up
+    token: str = fallback(token, app_context.config.github.personal_access_token)
+    org: str = fallback(org, app_context.config.github.organization)
+    feedback_source_repo: str = fallback(
+        feedback_source_repo, app_context.config.announce_grade.feedback_source_repo
+    )
 
     ensure_gh_token(token)
+    if not (yes or typer.confirm(f"Add annouce_grade to {org}/{homework_prefix}?")):
+        raise typer.Abort()
+
     # TODO: use logging lib to log messages
     spinner = Halo(stream=sys.stderr)
 
@@ -76,7 +89,7 @@ def announce_grade(
             dir=".",
         )
     )
-    spinner.succeed("Create tmp folder " + console_txt(kw(root_folder)))
+    spinner.succeed(f"Create tmp folder {root_folder}")
 
     feedback_repo_path = root_folder / "feedbacks"
 
@@ -154,7 +167,7 @@ def announce_grade(
     if dry:
         spinner.succeed("DRYRUN: skip push to remote")
     else:
-        if click.confirm("Do you want to continue?", default=False):
+        if typer.confirm("Do you want to continue?", default=False):
             _, t = measure_time(trio.run)(push_to_remote, student_feedback_title, fbs)
             spinner.succeed(f"Push feedbacks to remote ... {t:5.2f} sec")
         else:

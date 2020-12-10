@@ -1,29 +1,29 @@
+from typing import Optional
+
 import trio
 import typer
 from tqdm import tqdm
 
-from ..config.github import config_grant_read_access
-from ..ensures import ensure_gh_token
-from ..shared_options import opt_dry, opt_gh_org, opt_github_token
+from invisible_hand.config import app_context
+from ..ensures import ensure_config_exists, ensure_gh_token
 from ..utils.github_entities import Team
 from ..utils.github_scanner import query_matching_repos
+from .shared_options import opt_all_yes, opt_dry, opt_gh_org, opt_github_token
 
 
 def grant_read_access(
     # @TODO: add autocompletion for option
     # https://typer.tiangolo.com/tutorial/options/autocompletion/
     hw_title: str = typer.Argument(
-        default=..., metavar="<💼hw>", help="target homework to grant access to"
+        default=..., metavar="<hw>", help="target homework to grant access to"
     ),
-    team: str = typer.Option(
-        config_grant_read_access["reader_team_slug"],
-        "--team",
-        help="team-slug of the Teaching teams",
-        show_default=True,
+    team: Optional[str] = typer.Option(
+        None, "--team", help="team-slug of the Teaching teams", show_default=True,
     ),
     dry: bool = opt_dry,
-    token: str = opt_github_token,
-    org: str = opt_gh_org,
+    yes: bool = opt_all_yes,
+    token: Optional[str] = opt_github_token,
+    org: Optional[str] = opt_gh_org,
 ):
     """make TAs being able to read all homework repos
 
@@ -31,9 +31,22 @@ def grant_read_access(
 
     For example: the team-slug of "2019 Teaching-team" would be "2019_teaching-team".
     """
+    ensure_config_exists()
     print("start script")
 
+    def fallback(val, fallback_value):
+        return val if val else fallback_value
+
+    # Handle default value manually because we'll change our config after app starts up
+    token: str = fallback(token, app_context.config.github.personal_access_token)
+    org: str = fallback(org, app_context.config.github.organization)
+    team: str = fallback(team, app_context.config.grant_read_access.reader_team_slug)
+
     ensure_gh_token(token)
+    if not (
+        yes or typer.confirm(f"Grant read access of {org}/{hw_title} to {org}/{team}?")
+    ):
+        raise typer.Abort()
 
     teaching_team = Team(org, team, token, dry)
 

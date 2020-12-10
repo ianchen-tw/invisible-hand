@@ -1,22 +1,43 @@
 import typer
 
-from .scripts.add_students import add_students
-from .scripts.grant_read_access import grant_read_access
-from .scripts.event_times import event_times
-from .scripts.patch_project import patch_project
-from .scripts.crawl_classroom import crawl_classroom
-from .scripts.announce_grade import announce_grade
-
-# from .scripts.dev import dev
+from .config import app as config_typer
+from .config import app_context
+from .scripts import (
+    add_students,
+    announce_grade,
+    crawl_classroom,
+    event_times,
+    grant_read_access,
+    patch_project,
+)
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 app = typer.Typer(context_settings=CONTEXT_SETTINGS)
 
-app.command("add-student")(add_students)
+
+@app.callback()
+def main(
+    custom_base: bool = typer.Option(
+        False, "--custom-base", help="use custom base folder for configs"
+    )
+):
+    print("[main] callback called")
+    config_manager = app_context.config_manager
+
+    if custom_base:
+        config_manager.change_base_folder("new-base")
+        typer.echo(f"Using custom base-folder: {config_manager.get_base_path()}")
+
+    # populate actual config
+    if config_manager.config_path.exists():
+        app_context.config = config_manager.read_config()
+
+
+app.command("add-students")(add_students)
 app.command("grant-read-access")(grant_read_access)
 app.command("event-times")(event_times)
 app.command("patch-project")(patch_project)
 app.command("crawl-classroom")(crawl_classroom)
 app.command("announce-grade")(announce_grade)
-# app.command("dev")(dev)
 
+app.add_typer(config_typer, name="config")

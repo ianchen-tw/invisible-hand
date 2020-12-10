@@ -1,14 +1,17 @@
+from typing import Optional
+
 import typer
 
-from invisible_hand import console
-from invisible_hand.errors import ERR_GIT_CREDENTIAL_HELPER_NOT_FOUND
+from invisible_hand.config import app_context
+from invisible_hand.errors import ERR_CANNOT_FETCH_TEAM
 
 
 def dev(
-    name: str = typer.Option("", help="Last name of person to greet."),
+    org: Optional[str] = typer.Option(None, help="Last name of person to greet."),
     age: str = typer.Option("", help="Some help message"),
 ):
-    console.log("good")
-    a = 87787
-    raise ERR_GIT_CREDENTIAL_HELPER_NOT_FOUND()
-    # print(f"hello: {name}")
+    raise ERR_CANNOT_FETCH_TEAM(org="1", team_slug="bb")
+    print(f"[dev]actual org :{org}")
+    print(f"[dev]aa org :{app_context.config.github.organization}")
+
+    print("nice")

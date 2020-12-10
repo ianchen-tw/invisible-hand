@@ -1,6 +1,6 @@
 import pytest
 
-from .base_config import *
+from invisible_hand.config.base_config import Config
 
 
 @pytest.mark.unit

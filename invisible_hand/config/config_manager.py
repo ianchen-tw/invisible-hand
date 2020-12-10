@@ -1,5 +1,6 @@
 import shutil
 from pathlib import Path
+from typing import Union
 
 import attr
 from tomlkit import parse
@@ -10,8 +11,7 @@ from .words import STR_CFG_NOT_EXISTS
 
 DEFAULT_BASE_FOLDER = Path.home() / ".invisible-hand"
 CFG_FILENAME = "config.toml"
-
-# TODO: dectect corrupted/uncorrect-formatted Config
+CLIENT_SECRET_FILENAME = "client_secret.json"
 
 
 class CONFIG_NOT_EXISTS(Exception):
@@ -23,20 +23,26 @@ class CONFIG_NOT_EXISTS(Exception):
         return f"{STR_CFG_NOT_EXISTS}: {self.path}"
 
 
-class CONFIG_CORRUPTED(Exception):
-    pass
-
-
 @attr.s(auto_attribs=True)
 class ConfigManager:
     base_folder: Path = attr.ib(default=DEFAULT_BASE_FOLDER, converter=Path)
     config_path: Path = attr.ib(init=False)
+    google_client_secret_path: Path = attr.ib(init=False)
 
     def __attrs_post_init__(self):
+        self.change_base_folder(self.base_folder)
+
+    def change_base_folder(self, new_base: Union[Path, str]):
+        self.base_folder = Path(new_base)
         self.config_path = self.base_folder / CFG_FILENAME
+        self.google_client_secret_path = self.base_folder / CLIENT_SECRET_FILENAME
+
+    def _ensure_base_folder(self):
+        """Create base folder if not exists"""
         self.base_folder.mkdir(parents=True, exist_ok=True)
 
     def create_default(self):
+        self._ensure_base_folder()
         with open(self.config_path, "w") as f:
             f.write(export_default_config())
 

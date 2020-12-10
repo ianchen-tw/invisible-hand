@@ -1,5 +1,5 @@
 [tool.poetry]
-authors = ["Ian Chen <ianre657@gmail.com>"]
+authors = ["Ian Chen"]
 description = "Automate your workflow with github classroom"
 exclude = ["tests"]
 name = "invisible-hand"
@@ -14,6 +14,7 @@ packages = [
 hand = "invisible_hand.cli:app"
 
 [tool.poetry.dependencies]
+attrs = "^20.3.0"
 beautifulsoup4 = "^4.9.1"
 click = "^7.1.2"
 colorama = "^0.4.3"
@@ -29,17 +30,16 @@ oauth2client = "^4.1.3"
 prompt-toolkit = "^3.0.6"
 pydantic = "^1.7"
 pygsheets = "^2.0.3"
-python = "^3.6.1"
+python = "^3.7"
 requests = "^2.24.0"
 rich = "^9.2.0"
 selenium = "^3.141.0"
 tabulate = "^0.8.7"
+tomlkit = "^0.7.0"
 tqdm = "^4.48.2"
 trio = "^0.16.0"
-typer = "^0.3.2"
+typer = {extras = ["all"], version = "^0.3.2"}
 xlsxwriter = "^1.3.3"
-tomlkit = "^0.7.0"
-attrs = "^20.3.0"
 
 [tool.poetry.dev-dependencies]
 autoflake = "^1.4"

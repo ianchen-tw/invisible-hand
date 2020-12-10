@@ -5,8 +5,7 @@ import httpx
 import requests
 from requests.models import Response
 
-from ..config.github import config_github
-
+from invisible_hand.config import app_context
 from invisible_hand.errors import ERR_CANNOT_FETCH_TEAM
 from .github_scanner import (
     get_github_endpoint,
@@ -126,7 +125,7 @@ class Team:
         try:
             result = get_github_endpoint(
                 "orgs/{}/teams/{}".format(self.org, self.team_slug),
-                config_github["personal_access_token"],
+                app_context.config.github.personal_access_token,
             )
         except:
             raise ERR_CANNOT_FETCH_TEAM(org=self.org, team_slug=self.team_slug)

@@ -59,6 +59,10 @@ def export_default_config() -> str:
         docu=docu,
         section_name="github",
         dic={
+            "organization": {
+                "comment": "Your GitHub organization (https://github.com/Organization/Repository/...)",
+                "value": default_cfg.github.organization,
+            },
             "personal_access_token": {
                 "comments": [
                     "Your GitHub API token here, inside the quotation marks",

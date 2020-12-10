@@ -2,10 +2,17 @@ import subprocess as sp
 
 import httpx
 
+from invisible_hand.config import app_context
 from invisible_hand.errors import (
+    ERR_CONFIG_NOT_EXISTS,
     ERR_GIT_CREDENTIAL_HELPER_NOT_FOUND,
     ERR_INVALID_GITHUB_TOKEN,
 )
+
+
+def ensure_config_exists():
+    if app_context.config is None:
+        raise ERR_CONFIG_NOT_EXISTS
 
 
 def ensure_git_cached():

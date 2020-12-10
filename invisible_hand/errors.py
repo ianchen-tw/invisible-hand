@@ -1,8 +1,26 @@
+import textwrap
 from pprint import pformat
 from typing import Dict, List, Optional
-from invisible_hand import console
-from .core.console_color import kw, danger
+
 from .urls import url_for_issue
+
+
+def format_paragraph(para: List[str]) -> str:
+    result = ["\n\n"]
+    for line in para:
+        result += f"{line}\n"
+    return textwrap.indent("".join(result), prefix=" " * 4)
+
+
+class ERR_CONFIG_NOT_EXISTS(Exception):
+    def __init__(self):
+        super().__init__(self)
+
+    def __str__(self):
+        return """
+        Config not exists
+        Use `hand config create` to create a new config file
+        """
 
 
 class ERR_UNIQUE_STUDENT_ID(Exception):
@@ -28,37 +46,30 @@ class ERR_REQUIRE_NO_SPACE(Exception):
 
 
 class ERR_GIT_CREDENTIAL_HELPER_NOT_FOUND(Exception):
-    def __init__(self):
-        super().__init__(self)
-
     def __str__(self):
         issue_git_cred = url_for_issue(issue_num=8)
-        with console.capture() as capture:
-            console.print()
-            console.print("[red]Not detect any credential helper inside git[/red], use:")
-            console.print(" [blue]git config --global credential.helper cache[/blue]")
-            console.print("before going any further.")
-            console.print("Or see:")
-            console.print(
-                f"  [link={issue_git_cred}][blue]{issue_git_cred}[/blue][/link]",
-            )
-            console.print("for more information")
-        return capture.get()
+        exps = [
+            "Not detecting any credential helper inside git, use:",
+            "   git config --global credential.helper cache",
+            "before going any further.",
+            "Or see:",
+            f"  {issue_git_cred}",
+            "for more information",
+        ]
+        return format_paragraph(exps)
 
 
 class ERR_INVALID_GITHUB_TOKEN(Exception):
     def __init__(self, token: Optional[str] = None):
         self.token = token
-        info = "Invalid token" + f": {token}" if token else ""
-        super().__init__(self, info)
+        super().__init__(self)
 
     def __str__(self) -> str:
-        with console.capture() as capture:
-            console.print("\n")
-            console.print(f"Invalid Github token", end="")
-            console.print(f": [blue]{self.token}[/blue]" if self.token else "")
-            console.print("please update [blue]github_config.ini[/blue]")
-        return capture.get()
+        exps = [
+            "Invalid Github token" + (f": {self.token}." if self.token else ""),
+            "Please update `github_config.ini`.",
+        ]
+        return format_paragraph(exps)
 
 
 class ERR_CANNOT_FETCH_TEAM(Exception):
@@ -68,11 +79,10 @@ class ERR_CANNOT_FETCH_TEAM(Exception):
         super().__init__(self, f"cannot fetch team: {self.org}/{self.team}")
 
     def __str__(self) -> str:
-        with console.capture() as capture:
-            console.print("\n")
-            console.print(danger("Cannot fetch team id"))
-            console.print("Team info :")
-            console.print(f"     org : {kw(self.org)}")
-            console.print(f"     team_slug: {kw(self.team)}")
-        return capture.get()
-
+        exps = [
+            "Cannot fetch team id",
+            "Team info :",
+            f"     org :{ self.org}",
+            f"     team_slig :{ self.team}",
+        ]
+        return format_paragraph(exps)
