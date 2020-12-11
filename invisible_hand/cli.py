@@ -1,3 +1,5 @@
+from typing import Optional
+
 import typer
 
 from .config import app as config_typer
@@ -17,14 +19,14 @@ app = typer.Typer(context_settings=CONTEXT_SETTINGS)
 
 @app.callback()
 def main(
-    custom_base: bool = typer.Option(
-        False, "--custom-base", help="use custom base folder for configs"
+    custom_base: Optional[str] = typer.Option(
+        None, "--custom-base", help="use custom base folder for configs"
     )
 ):
     config_manager = app_context.config_manager
 
     if custom_base:
-        config_manager.change_base_folder("new-base")
+        config_manager.change_base_folder(custom_base)
         typer.echo(f"Using custom base-folder: {config_manager.get_base_path()}")
 
     # populate actual config
