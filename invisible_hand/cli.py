@@ -21,7 +21,6 @@ def main(
         False, "--custom-base", help="use custom base folder for configs"
     )
 ):
-    print("[main] callback called")
     config_manager = app_context.config_manager
 
     if custom_base:
