@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from xlsxwriter.utility import xl_col_to_name
 
 from invisible_hand.config import app_context
-from invisible_hand.ensures import ensure_config_exists
+from invisible_hand.ensures import ensure_client_secret_json_exists, ensure_config_exists
 from ..errors import ERR_REQUIRE_NO_SPACE, ERR_UNIQUE_STUDENT_ID
 
 
@@ -29,6 +29,7 @@ def contains_space(word: str) -> bool:
 
 class pygsheetInteractor:
     def __init__(self, pyg=pygsheets):
+        ensure_client_secret_json_exists()
         self.gc = pyg.authorize(
             client_secret=app_context.config_manager.google_client_secret_path
         )

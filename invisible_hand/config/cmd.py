@@ -39,8 +39,8 @@ def create():
     raise typer.Exit(0)
 
 
-@app.command("get-client-secret")
-def get_client_secret(
+@app.command("copy-client-secret")
+def copy_client_secret(
     file_path: str = typer.Argument(default=..., help="Path to your client_secret file"),
 ):
     """Copy client_secret.json to cache folder"""

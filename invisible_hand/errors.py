@@ -12,6 +12,21 @@ def format_paragraph(para: List[str]) -> str:
     return textwrap.indent("".join(result), prefix=" " * 4)
 
 
+class ERR_GOOGLE_CLIENT_SECRET_NOT_EXISTED(Exception):
+    def __str__(self):
+        exps = [
+            "Didn't detect a `client_secret.json` file inside your cache folder",
+            "If you already have it, use",
+            "   `hand config copy-client <path-to-your-client-secret-file>",
+            "to copy it into your cache folder",
+            "",
+            "If you don't know how to get this file, follow",
+            "   https://pygsheets.readthedocs.io/en/stable/authorization.html",
+            "to get your client_secret file, and follow the step above to copy it to the cache folder",
+        ]
+        return format_paragraph(exps)
+
+
 class ERR_CHROME_DRIVER_NOT_INSTALLED(Exception):
     def __str__(self):
         exps = [

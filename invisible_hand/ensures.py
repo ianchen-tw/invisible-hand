@@ -6,6 +6,7 @@ from invisible_hand.config import app_context
 from invisible_hand.errors import (
     ERR_CONFIG_NOT_EXISTS,
     ERR_GIT_CREDENTIAL_HELPER_NOT_FOUND,
+    ERR_GOOGLE_CLIENT_SECRET_NOT_EXISTED,
     ERR_INVALID_GITHUB_TOKEN,
 )
 
@@ -13,6 +14,11 @@ from invisible_hand.errors import (
 def ensure_config_exists():
     if app_context.config is None:
         raise ERR_CONFIG_NOT_EXISTS
+
+
+def ensure_client_secret_json_exists():
+    if not app_context.config_manager.google_client_secret_path.exists():
+        raise ERR_GOOGLE_CLIENT_SECRET_NOT_EXISTED
 
 
 def ensure_git_cached():
