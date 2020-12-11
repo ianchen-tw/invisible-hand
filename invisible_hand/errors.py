@@ -12,10 +12,20 @@ def format_paragraph(para: List[str]) -> str:
     return textwrap.indent("".join(result), prefix=" " * 4)
 
 
-class ERR_CONFIG_NOT_EXISTS(Exception):
-    def __init__(self):
-        super().__init__(self)
+class ERR_CHROME_DRIVER_NOT_INSTALLED(Exception):
+    def __str__(self):
+        exps = [
+            "`chromedriver` not installed",
+            "You need to install it before going further.",
+            "If your'e using ubuntu, run:",
+            "   `apt install chromium-chromedriver`",
+            "For Mac users, run:",
+            "   `brew cask install chromedriver`",
+        ]
+        return format_paragraph(exps)
 
+
+class ERR_CONFIG_NOT_EXISTS(Exception):
     def __str__(self):
         return """
         Config not exists

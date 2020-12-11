@@ -1,6 +1,4 @@
 import atexit
-import errno
-import os
 import shutil
 import sys
 from pathlib import Path
@@ -18,11 +16,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from invisible_hand.config import app_context
 from invisible_hand.ensures import ensure_config_exists
+from invisible_hand.errors import ERR_CHROME_DRIVER_NOT_INSTALLED
 
 spinner = Halo(stream=sys.stderr)
 
 # must reside in root folder
-EXTENSION_FILE = "chrome-ghclassroom-waiter.crx"
+# change the extension version for newer versions
+EXTENSION_FILE_VERSION = ""
+EXTENSION_FILE = "chrome-ghclassroom-waiter{EXTENSION_FILE_VERSION}.crx"
 
 
 def cache_extension_path() -> Path:
@@ -193,7 +194,7 @@ def createDriver(headless=True) -> webdriver:
 
     cdriver_path = shutil.which("chromedriver")
     if cdriver_path is None:
-        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), "chromedriver")
+        raise ERR_CHROME_DRIVER_NOT_INSTALLED
     driver = webdriver.Chrome(options=options, executable_path=cdriver_path)
     return driver
 
