@@ -104,9 +104,9 @@ Patch to student homework repositories.
 Take homework : **`hw3`**(the title of your homework in github classroom) for example: <br>
 The repository: **`tmpl-hw3`** would be your template for initializing homeworks.
 
-### 1. Create another repo with name **`tmpl-hw3-revise`** to update your template
+#### 1. Create another repo with name **`tmpl-hw3-revise`** to update your template
 
-### 2. Inside **`tmpl-hw3-revise`**
+#### 2. Inside **`tmpl-hw3-revise`**
 
 1. Create a revision branch **`2-revise-for-node-definition`** (whatever you like)
 
@@ -121,7 +121,7 @@ The repository: **`tmpl-hw3`** would be your template for initializing homeworks
 <img src="./imgs/patch-template-issue.png" alt=" template issue" width="640">
 </p>
 
-### 3. Open GitHub Classroom
+#### 3. Open GitHub Classroom
 
 Select your assignment (**`hw3`**) and disable `assignment invitation URL` of **`hw3`**
 
@@ -129,18 +129,18 @@ Select your assignment (**`hw3`**) and disable `assignment invitation URL` of **
 <img src="./imgs/patch-diable-hw.png" alt="disable invitation url" width="640">
 </p>
 
-### 4. Create an PR to your template repo (**`hw3`**)
+#### 4. Create an PR to your template repo (**`hw3`**)
 
 ``` sh
 hand patch-project hw3 --only-repo="tmpl-hw3" 2-revise-for-node-definition
 ```
 
-### 5. Accept the PR in your template repository (**`tmpl-hw3`**)
+#### 5. Accept the PR in your template repository (**`tmpl-hw3`**)
 
 After that, enable the `assignment invitation URL` of `hw3` in GitHub Classroom.<br>
 Now you have succcessfully updated your template repo.
 
-### 6. Create PRs to students template repositories ( `hw3-<their github id>` )
+#### 6. Create PRs to students template repositories ( `hw3-<their github id>` )
 
 Patch to every repository that uses **hw3** as the prefix under your GitHub organization.
 
@@ -148,12 +148,12 @@ Patch to every repository that uses **hw3** as the prefix under your GitHub orga
 hand patch-project hw3 2-revise-for-node-definition
 ```
 
-### 7. Merge the revision branch **`2-revise-for-node-definition`** inside `tmpl-hw3`
+#### 7. Merge the revision branch **`2-revise-for-node-definition`** inside `tmpl-hw3`
 
 
 After this step, all documents are updated
 
-### 8. Reactivate the invitation URL
+#### 8. Reactivate the invitation URL
 
 <p align="center">
 <img src="./imgs/patch-enable-hw.png" alt="reactivate invitation url" width="640">
