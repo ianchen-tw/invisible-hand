@@ -1,7 +1,7 @@
 from typing import Optional
-from pydantic.error_wrappers import ValidationError
 
 import typer
+from pydantic.error_wrappers import ValidationError
 
 from .config import app as config_typer
 from .config import app_context
@@ -15,7 +15,10 @@ from .scripts import (
 )
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
-app = typer.Typer(context_settings=CONTEXT_SETTINGS)
+app = typer.Typer(
+    context_settings=CONTEXT_SETTINGS,
+    help="Manage your classroom under Github organization.",
+)
 
 
 @app.callback()

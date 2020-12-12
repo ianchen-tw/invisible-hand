@@ -15,6 +15,8 @@ It utilizes `Google Sheets` , `GitHub Classroom` and `GitHub` seamlessly.
 ╰─❯ hand -h
 Usage: hand [OPTIONS] COMMAND [ARGS]...
 
+  Manage your classroom under Github organization.
+
 Options:
   --custom-base TEXT    Use custom base folder for configs
   --install-completion  Install completion for the current shell.
@@ -26,7 +28,7 @@ Options:
 Commands:
   add-students       Invite students to join our Github organization
   announce-grade     Announce student grades to each hw repo
-  config
+  config             Config File utilities
   crawl-classroom    Get student's submissions from Github Classroom
   event-times        Retrieve information about late submissions <repo-
                      hash>...

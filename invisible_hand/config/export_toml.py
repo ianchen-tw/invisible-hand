@@ -1,5 +1,4 @@
 from typing import Dict, Optional
-from requests.api import head
 
 from tomlkit import comment, document, dumps, nl, table
 

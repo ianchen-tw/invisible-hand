@@ -11,7 +11,7 @@ from .words import STR_CFG_IS_VALID, STR_CFG_NOT_EXISTS
 
 manager: ConfigManager
 
-app = typer.Typer()
+app = typer.Typer(help="Config File utilities")
 
 
 @app.callback()
