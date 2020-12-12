@@ -1,6 +1,6 @@
-# Invisible Hand
+# Invisible Hand 👊
 
-Invisible Hand is a set of tools to manage your classroom inside github organization.<br>
+Invisible Hand helps you manage your classroom under Github organization.<br>
 It utilizes `Google Sheets` , `GitHub Classroom` and `GitHub` seamlessly.
 
 ## Installation
