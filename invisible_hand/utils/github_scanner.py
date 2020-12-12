@@ -11,12 +11,15 @@ import os
 import re
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import List
 
 import iso8601
 import requests
 import trio
 from requests.models import Response
+
+from invisible_hand.config import app_context
 
 scanner_cache = {}
 
@@ -29,7 +32,10 @@ def load_cache(github_organization: str, verbose: bool = True):
     if github_organization in scanner_cache:
         return
 
-    cache_name = ".github-classroom-utils." + github_organization + ".json"
+    cache_name = Path(
+        app_context.config_manager.base_folder
+        / f".github-classroom-utils.{github_organization}.json"
+    )
     try:
         if os.path.isfile(cache_name) and os.access(cache_name, os.R_OK):
             with open(cache_name, "r") as file:
@@ -54,7 +60,10 @@ def store_cache(github_organization: str, verbose: bool = True):
             )
         return
 
-    cache_name = ".github-classroom-utils." + github_organization + ".json"
+    cache_name = Path(
+        app_context.config_manager.base_folder
+        / f".github-classroom-utils.{github_organization}.json"
+    )
     try:
         with open(cache_name, "w") as file:
             # Pretty-printing the results, even though they're larger. Human-legibility may come in handy.

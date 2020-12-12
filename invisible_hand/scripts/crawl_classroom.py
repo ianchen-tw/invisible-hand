@@ -1,11 +1,11 @@
 import atexit
-import errno
-import os
 import shutil
 import sys
 from pathlib import Path
+from typing import Optional
 
-import click
+import requests
+import typer
 from bs4 import BeautifulSoup
 from halo import Halo
 from selenium import webdriver
@@ -14,9 +14,31 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from ..config.github import config_crawl_classroom
+from invisible_hand.config import app_context
+from invisible_hand.ensures import ensure_config_exists
+from invisible_hand.errors import ERR_CHROME_DRIVER_NOT_INSTALLED
 
 spinner = Halo(stream=sys.stderr)
+
+# must reside in root folder
+# change the extension version for newer versions
+EXTENSION_FILE_VERSION = ""
+EXTENSION_FILE = "chrome-ghclassroom-waiter{EXTENSION_FILE_VERSION}.crx"
+
+
+def cache_extension_path() -> Path:
+    """ Download and cache chrome extension from github
+    """
+    extension_path: Path = app_context.config_manager.base_folder / EXTENSION_FILE
+    url: str = f"https://github.com/ianre657/invisible-hand/raw/master/{EXTENSION_FILE}"
+    if not extension_path.exists():
+        response = requests.get(url, allow_redirects=True)
+        print(response.json)
+        if response.status_code == 200:
+            open(extension_path, "wb").write(response.content)
+        else:
+            raise RuntimeError("Cannot download file from {url}")
+    return extension_path
 
 
 class Condition_logined:
@@ -51,18 +73,28 @@ class Condition_logined:
 BaseURL = "https://classroom.github.com"
 
 
-@click.command()
-@click.argument("hw_title")
-@click.argument("output")
-@click.option("--login", default=config_crawl_classroom["login"], show_default=True)
-@click.option("--passwd")
-@click.option(
-    "--classroom_id", default=config_crawl_classroom["classroom_id"], show_default=True
-)
-def crawl_classroom(hw_title, login, passwd, classroom_id, output):
-    """Get student homework submitted version from github classroom
-    @output :filename to output your result
+def crawl_classroom(
+    hw_title=typer.Argument(..., help="homework submission to crawl"),
+    output: str = typer.Argument(..., help="filename to output your result"),
+    classroom_id: Optional[str] = typer.Option(None, show_default=True),
+    login: Optional[str] = typer.Option(None),
+    passwd: Optional[str] = typer.Option(
+        default=None, help="password for your github classroom"
+    ),
+):
+    """Get student's submissions from Github Classroom
     """
+    ensure_config_exists()
+
+    def fallback(val, fallback_value):
+        return val if val else fallback_value
+
+    # Handle default value manually because we'll change our config after app starts up
+    classroom_id: str = fallback(
+        classroom_id, app_context.config.crawl_classroom.classroom_id
+    )
+    login: str = fallback(login, app_context.config.crawl_classroom.login)
+
     spinner.start()
     if output is not None:
         if Path(output).exists():
@@ -157,11 +189,12 @@ def createDriver(headless=True) -> webdriver:
     options = Options()
     options.headless = headless
     options.add_argument("--window-size=1920,1200")
-    options.add_extension("./chrome-ghclassroom-waiter.crx")
+
+    options.add_extension(cache_extension_path())
 
     cdriver_path = shutil.which("chromedriver")
     if cdriver_path is None:
-        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), "chromedriver")
+        raise ERR_CHROME_DRIVER_NOT_INSTALLED
     driver = webdriver.Chrome(options=options, executable_path=cdriver_path)
     return driver
 

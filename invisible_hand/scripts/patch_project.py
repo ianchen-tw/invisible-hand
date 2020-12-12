@@ -7,48 +7,66 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
 
-import click
 import requests
+import typer
 from git import Repo
 from git.objects.commit import Commit
 from halo import Halo
 
-from invisible_hand.ensures import ensure_gh_token, ensure_git_cached
-from ..config.github import config_github
-from ..core.color_text import normal, warn
+from invisible_hand.config import app_context
+from invisible_hand.ensures import (
+    ensure_config_exists,
+    ensure_gh_token,
+    ensure_git_cached,
+)
 from ..utils.github_scanner import (
     get_github_endpoint_paged_list,
     github_headers,
     query_matching_repos,
 )
+from .shared_options import opt_all_yes, opt_gh_org, opt_github_token
 
 # The Pull request we made would fetch the first issue which has the same title
 # as patch_branch to be the content
 
 
-@click.command()
-@click.argument("hw-prefix")
-@click.argument("patch-branch")
-@click.option("--source-repo", default="", help="default to tmpl-{hw-prefix}-revise")
-@click.option(
-    "--token", default=config_github["personal_access_token"], help="github access token"
-)
-@click.option("--org", default=config_github["organization"], show_default=True)
-@click.option("--only-repo", nargs=1, help="only repo to patch")
-@click.option(
-    "--dry",
-    help="dry run, do not publish result to the remote",
-    is_flag=True,
-    default=False,
-)
-def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo, dry):
+def patch_project(
+    hw_prefix: str = typer.Argument(default=..., help="prefix of the homework title"),
+    patch_branch: str = typer.Argument(
+        default=..., help="source bracnch to patch to the main branch"
+    ),
+    source_repo: Optional[str] = typer.Option(
+        default=None, help="default to tmpl-{hw-prefix}-revise"
+    ),
+    only_repo: Optional[str] = typer.Option(default=None, help="only repo to patch"),
+    dry: bool = typer.Option(
+        False, "--dry", help="dry run, do not publish result to the remote"
+    ),
+    yes: bool = opt_all_yes,
+    token: str = opt_github_token,
+    org: str = opt_gh_org,
+):
     """Patch to student homeworks"""
+    ensure_config_exists()
+
+    def fallback(val, fallback_value):
+        return val if val else fallback_value
+
+    # Handle default value manually because we'll change our config after app starts up
+    token: str = fallback(token, app_context.config.github.personal_access_token)
+    org: str = fallback(org, app_context.config.github.organization)
+
     ensure_git_cached()
     ensure_gh_token(token)
+
+    if not (
+        yes or typer.confirm(f"Patch homework:{hw_prefix} from branch:{patch_branch}?")
+    ):
+        raise typer.Abort()
     # init
     spinner = Halo(stream=sys.stderr)
 
-    if source_repo == "":
+    if not source_repo:
         source_repo = f"tmpl-{hw_prefix}-revise"
 
     # Check if repo already contains the patched branch. Skip if so.
@@ -68,13 +86,7 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo, d
         shutil.rmtree(d)
     spinner.info("delete dated folder")
 
-    spinner.start(
-        normal.txt("Fetch issue template")
-        .kw(patch_branch)
-        .txt(" from ")
-        .kw(source_repo)
-        .to_str()
-    )
+    spinner.start(f"Fetch issue template {patch_branch} from {source_repo}")
     # Fetch patch template on the source repo
     issues = get_github_endpoint_paged_list(
         endpoint=f"repos/{org}/{source_repo}/issues", github_token=token, verbose=False
@@ -101,10 +113,8 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo, d
         )
     )
 
-    spinner.succeed(normal.txt("Create tmp folder ").kw(root_folder).to_str())
-    spinner.info(
-        normal.txt("Fetch soure repo").kw(source_repo).txt(" from GitHub ").to_str()
-    )
+    spinner.succeed(f"Create tmp folder: {root_folder}")
+    spinner.info(f"Fetch source repo {source_repo} from Github")
     src_repo_path = root_folder / "source_repo"
     sp.run(
         [
@@ -145,7 +155,7 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo, d
         ]
         repo = next(iter(repos), None)
         if repo:
-            spinner.info(normal.txt("Only patch to repo : ").kw(repo["name"]).to_str())
+            spinner.info("Only patch to repo : " + repo["name"])
         repos = [repo]
     else:
         repos = query_matching_repos(
@@ -157,9 +167,7 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo, d
     student_path = root_folder / "student_repos"
     student_path.mkdir()
     for repo_idx, r in enumerate(repos, start=1):
-        pre_prompt_str = (
-            normal.txt(f"({repo_idx}/{len(repos)})").kw(f" {r['name']} ").to_str()
-        )
+        pre_prompt_str = f"({repo_idx}/{len(repos)}) " + r["name"]
         spinner.start()
 
         # Check if repo already contains the patched branch. Skip if so.
@@ -169,13 +177,13 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo, d
             headers=github_headers(token),
         )
         if res.status_code == 200:  # this branch exists in the remote
-            spinner.text = (
-                pre_prompt_str + normal.kw("  Skip  ").txt("already patched ").to_str()
-            )
+            spinner.text = pre_prompt_str + " Skip " + " already patched"
+
             spinner.succeed()
             continue
 
-        spinner.text = pre_prompt_str + normal.txt(" cloning repo...").to_str()
+        spinner.text = pre_prompt_str + "cloning repo"
+
         sp.run(
             ["git", "clone", "--depth=1", r["html_url"]],
             cwd=student_path,
@@ -215,9 +223,8 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo, d
         # Pass if no changed
         student_repo = Repo(student_path / hw_repo_name)
         if len(student_repo.index.diff("HEAD")) == 0:
-            spinner.text = (
-                pre_prompt_str + normal.kw2("  Passed  ").txt("Repo no change").to_str()
-            )
+            spinner.text = pre_prompt_str + " Passed " + " no changes in repo"
+
             spinner.succeed()
             continue
 
@@ -228,9 +235,9 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo, d
             stderr=sp.DEVNULL,
         )
 
-        spinner.text = pre_prompt_str + normal.kw(" publish patch to remote...").to_str()
+        spinner.text = pre_prompt_str + " publish patch to remote..."
         if dry:
-            spinner.succeed(pre_prompt_str + normal.txt(" Patched ").to_str())
+            spinner.succeed(pre_prompt_str + " Patched ")
             continue
         res = sp.run(
             ["git", "push", "-u", "origin", patch_branch],
@@ -239,15 +246,11 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo, d
             stderr=sp.DEVNULL,
         )
         if res.returncode != 0:
-            spinner.text = (
+            spinner.fail(
                 pre_prompt_str
-                + warn.kw("  Failed  ")
-                + warn.txt(" Cannot push branch ")
-                .kw2(patch_branch)
-                .txt(" to origin")
-                .to_str()
+                + "  Failed  "
+                + f"Cannot push branch {patch_branch} to_origin"
             )
-            spinner.fail()
             continue
 
         # open an pull-request on students repo
@@ -264,21 +267,15 @@ def patch_project(hw_prefix, patch_branch, source_repo, token, org, only_repo, d
             json=body,
         )
         if res.status_code == 201:
-            spinner.text = pre_prompt_str + normal.txt(" Patched ").to_str()
-            spinner.succeed()
+            spinner.succeed(f"{pre_prompt_str} Patched ")
         else:
-            spinner.text = (
+            spinner.fail(
                 pre_prompt_str
-                + warn.kw("  Failed  ")
-                + warn.txt("Cannot create PR")
-                .kw2(patch_branch)
-                .txt("to origin/master")
-                .to_str()
+                + "  Failed  "
+                + f"Cannot create PR {patch_branch} to origin/master"
             )
-            spinner.fail()
             try:
-                info = warn.txt("    ").txt(res.json()["errors"][0]["message"]).to_str()
-                print(info)
+                print(res.json()["errors"][0]["message"])
             except:
                 pass
             continue

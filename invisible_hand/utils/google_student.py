@@ -5,7 +5,8 @@ import pygsheets
 from pydantic import BaseModel
 from xlsxwriter.utility import xl_col_to_name
 
-from ..config.gsheet import config_gsheet
+from invisible_hand.config import app_context
+from invisible_hand.ensures import ensure_client_secret_json_exists, ensure_config_exists
 from ..errors import ERR_REQUIRE_NO_SPACE, ERR_UNIQUE_STUDENT_ID
 
 
@@ -28,7 +29,10 @@ def contains_space(word: str) -> bool:
 
 class pygsheetInteractor:
     def __init__(self, pyg=pygsheets):
-        self.gc = pyg.authorize()
+        ensure_client_secret_json_exists()
+        self.gc = pyg.authorize(
+            client_secret=app_context.config_manager.google_client_secret_path
+        )
         self.sht = None
 
     def open_by_url(self, url):
@@ -62,9 +66,15 @@ class pygsheetInteractor:
 
 
 class Gstudents:
-    def __init__(self, url=config_gsheet["spreadsheet_url"], actor=None):
+    def __init__(self, url: Optional[str] = None, actor=None):
+        if url:
+            self.url = url
+        else:
+            ensure_config_exists()
+            self.url = app_context.config.google_spreadsheet.spreadsheet_url
+
         self.actor = actor if actor is not None else pygsheetInteractor()
-        self.actor.open_by_url(url)
+        self.actor.open_by_url(self.url)
 
         self.config = {
             "main_wks_title": "StudentInfo",

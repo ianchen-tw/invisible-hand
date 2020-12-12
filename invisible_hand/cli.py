@@ -1,30 +1,51 @@
-import click
+from typing import Optional
 
-from .scripts.add_students import add_students
-from .scripts.announce_grade import announce_grade
-from .scripts.crawl_classroom import crawl_classroom
-from .scripts.event_times import event_times
-from .scripts.grant_read_access import grant_read_access
-from .scripts.patch_project import patch_project
+import typer
+from pydantic.error_wrappers import ValidationError
 
-
-@click.group(
-    invoke_without_command=True, context_settings=dict(help_option_names=["-h", "--help"])
+from .config import app as config_typer
+from .config import app_context
+from .scripts import (
+    add_students,
+    announce_grade,
+    crawl_classroom,
+    event_times,
+    grant_read_access,
+    patch_project,
 )
-@click.pass_context
-def cli(ctx):
-    """Toolkits for github courses"""
-    if ctx.invoked_subcommand is None:
-        click.echo(ctx.get_help())
+
+CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
+app = typer.Typer(
+    context_settings=CONTEXT_SETTINGS,
+    help="Manage your classroom under Github organization.",
+)
 
 
-cli.add_command(add_students)
-cli.add_command(event_times)
-cli.add_command(patch_project)
-cli.add_command(announce_grade)
-cli.add_command(crawl_classroom)
-cli.add_command(grant_read_access)
+@app.callback()
+def main(
+    custom_base: Optional[str] = typer.Option(
+        None, "--custom-base", help="Use custom base folder for configs"
+    )
+):
+    config_manager = app_context.config_manager
+
+    if custom_base:
+        config_manager.change_base_folder(custom_base)
+        typer.echo(f"Using custom base-folder: {config_manager.get_base_path()}")
+
+    # populate actual config
+    if config_manager.config_path.exists():
+        try:
+            app_context.config = config_manager.read_config()
+        except ValidationError:
+            typer.echo("[Warning] Corrupted config file")
 
 
-def main():
-    cli()
+app.command("add-students")(add_students)
+app.command("grant-read-access")(grant_read_access)
+app.command("event-times")(event_times)
+app.command("patch-project")(patch_project)
+app.command("crawl-classroom")(crawl_classroom)
+app.command("announce-grade")(announce_grade)
+
+app.add_typer(config_typer, name="config")
