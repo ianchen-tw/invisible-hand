@@ -1,4 +1,5 @@
 from typing import Optional
+from pydantic.error_wrappers import ValidationError
 
 import typer
 
@@ -20,7 +21,7 @@ app = typer.Typer(context_settings=CONTEXT_SETTINGS)
 @app.callback()
 def main(
     custom_base: Optional[str] = typer.Option(
-        None, "--custom-base", help="use custom base folder for configs"
+        None, "--custom-base", help="Use custom base folder for configs"
     )
 ):
     config_manager = app_context.config_manager
@@ -31,7 +32,10 @@ def main(
 
     # populate actual config
     if config_manager.config_path.exists():
-        app_context.config = config_manager.read_config()
+        try:
+            app_context.config = config_manager.read_config()
+        except ValidationError:
+            typer.echo("[Warning] Corrupted config file")
 
 
 app.command("add-students")(add_students)

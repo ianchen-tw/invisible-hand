@@ -1,92 +1,89 @@
 # Invisible Hand
 
-Invisible Hand is a set of tools to manage your classroom inside github organization. It utilizes `Google Sheets` , `GitHub Classroom` and `GitHub` seamlessly.
+Invisible Hand is a set of tools to manage your classroom inside github organization.<br>
+It utilizes `Google Sheets` , `GitHub Classroom` and `GitHub` seamlessly.
 
 ## Installation
 
-#### 1. Install via pip
+#### 1. Install this tool via pip
 
  `pip install invisible-hand`
 
-#### 2. Install chromedriver
+ Use `hand -h` to test if it is installed
 
-* OSX
-
- `brew cask install chromedriver`
-* Ubuntu
-
- `apt install chromium-chromedriver`
-
-## Config Files
-
-__Invisible Hand__ operates on 2 config files: `github_config.ini` and `gsheet_config.ini` .
-
-Calling `hand` will automatically propagate these files into working directory with default template. Make sure you have configured them correctly before using them.
-
-Additionally, if you want to use [ `Announce Grade` ](#announce-grade), follow [here](https://pygsheets.readthedocs.io/en/stable/authorization.html) to get your client secret file and rename it to __client_secret.json__
-
-## Usage
-
-### hand
-
-The root command
-
-<details>
-<summary><b>Show Detail Information</b></summary>
-
-#### Help Message
-
-append `-h` or `--help` options get help messages
-
-``` sh
-$ hand -h
+```
+╰─❯ hand -h
 Usage: hand [OPTIONS] COMMAND [ARGS]...
 
-    Toolkits for compiler-f19
-
 Options:
-    -h, --help         Show this message and exit.
+  --custom-base TEXT    Use custom base folder for configs
+  --install-completion  Install completion for the current shell.
+  --show-completion     Show completion for the current shell, to copy it or
+                        customize the installation.
+
+  -h, --help            Show this message and exit.
 
 Commands:
-    add-students       student_ids: ids to add
-    announce-grade     announce student grades to each hw repo
-    event-times        repo-hashes : list of <repo>:<hash> strings ex:...
-    grant-team-access  Add students into a github team hw-prefix: prefix for...
-    patch-project      Patch to student homeworks
+  add-students       Invite students to join our Github organization
+  announce-grade     Announce student grades to each hw repo
+  config
+  crawl-classroom    Get student's submissions from Github Classroom
+  event-times        Retrieve information about late submissions <repo-
+                     hash>...
+
+  grant-read-access  Make TAs being able to read all homework repos...
+  patch-project      Patch to student homeworks
 ```
 
-</details>
+#### 2. Install chromedriver
+
+* Mac : `brew cask install chromedriver`
+* Ubuntu : `apt install chromium-chromedriver`
+
+## Getting Started
+
+**1. Create config file**
+
+The main config file is located in `$HOME/.invisible-hand/config.toml`. <br>
+Run `hand config create` to create a template and use `hand config edit` to open it with an editor.
+
+**2. `(Not required)` Getting your `client_secret.json` for accessing GoogleSheets**
+
+To run the command:[ `Announce Grade` ](#announce-grade), follow the steps below to setup your environment first
+
+1. Follow [Authorization for pygsheets][pygsheet-auth] to get your credential file (`client_secret.json`)
+2. Locate your secret file and use `hand config copy-client-secret YOUR-SECRET-FILE` to copy it into the cache.
+
+    This command would automatically rename your secret file to (`$HOME/.invisible-hand/client_secret.json`)
+
+[pygsheet-auth]: https://pygsheets.readthedocs.io/en/stable/authorization.html
+
+## Quick references
+
+(This tool supports auto-completion, use `hand --install-completion` to add completion support to your shell)
+
++ `hand`: The root command, use `-h` to see more information
+  + `config`: subcommand to handle config files, use `-h` to see more information
+    + `create`: Create a config file from template to `$HOME/.invisible-hand/config.toml`
+    + `check`: Check if the format your config file is valid
+    + `path`: Show the root path to your config folder, default to `$HOME/.invisble-hand`
+    + `edit`: Open your config file with your default editor. (use `--editor <your editor>` to open your another one)
+    + `copy-client-secret`: Copy Google's `client_secret.json` to the cache folder.
+      + use `hand config copy-client-secret -h` to see more information
+  + [`add-students 🧑‍💼student1 🦸‍♂️student2 ...`][add-students]: Invite users into your GitHub organization
+    + `🧑‍💼student`- GitHub handle of the student
+  + `grant-read-access 📝 hw-title`:  Grant TA's group read access to all repo with such prefix.
+    + `📝 hw-title`- title prefix of the homework (e.g. `hw3`)
+  + [`patch-project 📝 hw-title  🚧 patch-branch`][patch-project]: Patch project to Students homeworks
+  + [`crawl-classroom 📝 hw-title 📦 submission-file`][crawl-classroom]: Crawl submission status of students on GitHub Classroom
+    + `📦 submission-file`- file to store submission output
+  + [`event-times 📦 submission-file`][event-times]: Check if there's late submissions
+  + [`announce-grade 📝 hw-title`][announce-grade]: Announce grade to students by opening issues in their repos
+
 
 ---
 
-### Add Students
-
-invite users into your github organization
-
-<details><summary><b>Show Detail Information</b></summary>
-
-#### Format
-
-``` sh
-hand add-students [github_handle]...
-```
-
-> Use `-h` to see more detailed information about this command.
-
-github_handle: github accounts
-
-#### Example
-
-``` sh
-hand add-students ianre657 cmprfk1 cmprfk2 cmprfk3
-```
-
-#### Config file
-
-* github_config.ini
-  + `[github]:personal_access_token`
-  + `[github]:organization`
-  + `[add_students]:default_team_slug`
+## Add Students
 
 #### FAQ
 
@@ -96,284 +93,219 @@ hand add-students ianre657 cmprfk1 cmprfk2 cmprfk3
 
     > about 2 of 80 students got this issue from our previous experience.
 
-</details>
 
----
 
-### Grant specific team read access to H. W. repos
-
-Grant read access right of TA's group to students' homework repo
-
-<details><summary><b>Show Detail Information</b></summary>
-
-#### Config File
-
-* __github_config.ini__:
-  + `[grant_read_access]:reader_team_slug` : team slug of your TA's group
-
-#### Format
-
-``` shell
-hand grant-read-access <hw_title>
-```
-
-#### Example
-
-``` shell
-hand grant-read-access hw3
-```
-
-</details>
-
----
-
-### Patch Project
+## Patch Project
 
 Patch to student homework repositories.
 
-<details><summary><b>Show Detail Information</b></summary>
+**Workflow**
 
-#### Config File
+Take homework : **`hw3`**(the title of your homework in github classroom) for example: <br>
+The repository: **`tmpl-hw3`** would be your template for initializing homeworks.
 
-* __github_config.ini__:
-  + `[github]:personal_access_token`
-  + `[github]:organization`
-* __gsheet_config.ini__
-  + `[google_spreadsheet]:spreadsheet_url`
+### 1. Create another repo with name **`tmpl-hw3-revise`** to update your template
 
-#### Format
+### 2. Inside **`tmpl-hw3-revise`**
+
+1. Create a revision branch **`2-revise-for-node-definition`** (whatever you like)
+
+<p align="center">
+<img src="./imgs/patch-branches.png" alt="name of the branch" width="640">
+</p>
+
+2. Create an issuse with the identiacal title **`2-revise-for-node-definition` )**
+   1.  the content of that issue would become the content of your PR message.
+
+<p align="center">
+<img src="./imgs/patch-template-issue.png" alt=" template issue" width="640">
+</p>
+
+### 3. Open GitHub Classroom
+
+Select your assignment (**`hw3`**) and disable `assignment invitation URL` of **`hw3`**
+
+<p align="center">
+<img src="./imgs/patch-diable-hw.png" alt="disable invitation url" width="640">
+</p>
+
+### 4. Create an PR to your template repo (**`hw3`**)
 
 ``` sh
-hand patch-project <hw_title> [--only-repo] <patch_branch>
+hand patch-project hw3 --only-repo="tmpl-hw3" 2-revise-for-node-definition
 ```
 
-> Use `-h` to see more detailed information about this command.
+### 5. Accept the PR in your template repository (**`tmpl-hw3`**)
 
-Below is the standard workflow to follow.
+After that, enable the `assignment invitation URL` of `hw3` in GitHub Classroom.<br>
+Now you have succcessfully updated your template repo.
 
-#### Workflow
+### 6. Create PRs to students template repositories ( `hw3-<their github id>` )
 
-take homework : __ `hw3` __(the title of your homework in github classroom) for example:
-
-1. The repo __ `tmpl-hw3` __ would be your template for initializing homeworks.
-2. Create another repo to update your template, let's say: __ `tmpl-hw3-revise` __
-3. Inside __ `tmpl-hw3-revise` __, create a revision branch __ `1-add-some-new-feature` __ (whatever you like) and an issuse named as the branch name (in this example, __ `1-add-some-new-feature` )__, which will be the content of your PR message.
-4. Open github-classroom, choose your assignment (__ `hw3` __) and disable `assignment invitation URL` of __ `hw3` __.
-5. Create an PR to your template repo (__ `hw3` __) by using this command.
-
-    
+Patch to every repository that uses **hw3** as the prefix under your GitHub organization.
 
 ``` sh
-    hand patch-project hw3 --only-repo="tmpl-hw3" 1-add-some-new-feature
-    ```
+hand patch-project hw3 2-revise-for-node-definition
+```
 
-6. Accept the PR in your template repository (__ `tmpl-hw3` __). After that, enable the `assignment invitation URL` of `hw3` in GitHub Classroom. Now you have succcessfully updated your template repo.
-7. Create PRs to students template repositories ( `hw3-<their github id>` ) by running the scirpt as followed.
+### 7. Merge the revision branch **`2-revise-for-node-definition`** inside `tmpl-hw3`
 
-    
 
-``` sh
-    hand patch-project hw3 1-add-some-new-feature
-    ```
+After this step, all documents are updated
 
-    This script would patch to every repository that uses __hw3__ as the prefix under your GitHub organization.
+### 8. Reactivate the invitation URL
 
-8. Merge the revision brnach __ `1-add-some-new-feature` __ into `master` in your __ `tmpl-hw3-revise` __ repo. After this step, all documents are updated.
+<p align="center">
+<img src="./imgs/patch-enable-hw.png" alt="reactivate invitation url" width="640">
+</p>
 
-#### Demo (Deprecated)
 
-<img src="./demos/patcher.gif" alt="patcher-demo-video" width="640">
-
-</details>
-
----
-
-### Crawl Classroom
+## Crawl Classroom
 
 Crawling homework submission data from Github Classroom
 
-<details><summary><b>Show Detail Information</b></summary>
+This is a web crawler for Github Classroom, which is the input of [ `Event Times` ][event-times]
 
-This is a web crawler for Github Classroom, which is the input of [ `Event Times` ](#event-times)
+### Config File
 
-#### Config File
-
-* __github_config.ini__:
+* **config.toml**:
   + `[crawl_classroom]:login` : your login id in Github Classroom
   + `[crawl_classroom]:classroom_id` : the id field of your classroom RESTful page URL. (see the image below)
 
-    <img src="./imgs/clsrm_id.png" alt="id field in the url of github classroom" width="640">
+<p align="center">
+ <img src="./imgs/clsrm_id.png" alt="id field in the url of github classroom" width="640">
+</p>
 
-#### Format
 
-``` sh
-hand crawl-classroom [OPTIONS] HW_TITLE OUTPUT
-```
 
-> Use `-h` to see more detailed information about this command
-
-#### Example
-
-``` shell
-hand crawl-classroom --passwd=(cat ~/cred/mypass) hw5 hw5_handle.txt
-```
-
-> This example suppose you use Fish Shell and store your password inside `~/cred/mypass`
-Users should type their passsword inside the pop-up window if they don't provide their password in the argument
-
-#### FAQ
+### FAQ
 
 * ChromeDriver
 
-  
-
-``` 
-  selenium.common.exceptions.SessionNotCreatedException: Message: session not created: This version of ChromeDriver only supports Chrome version 79
+  ```
+  selenium.common.exceptions.SessionNotCreatedException: Message: session not created:
+  This version of ChromeDriver only supports Chrome version 79
   ```
 
-  upgrade your chromedriver via `brew cask upgrade chromedriver`
-* All students not submitted
-  + Remember to set deadline of hw on the GitHub classroom (note that deadline can only be set at a future time)
+    upgrade your chromedriver via `brew cask upgrade chromedriver`
+  * All students not submitted
+    + Remember to set deadline of hw on the GitHub classroom (note that deadline can only be set at a future time)
 
-#### Demo
-
+<p align="center">
+<strong>Demo</strong><br>
 <img src="./demos/github_classroom_craw.gif" alt="github_classroom_craw" width="640">
+</p>
 
-</details>
 
----
 
-### Event Times
+
+## Event Times
 
 Retrieve information about late submissions
 
-<details><summary><b>Show Detail Information</b></summary>
-
-#### What it actually does
+**What it actually does**
 
 Compare the last publish-time of specific git commit in each repository and print out which passed the deadline.
 
-#### Config File
 
-* __github_config.ini__:
-  + `[event_times]:deadline` deadline for homework, in ISO8601 compatible format.
-
-    For example `2019-11-12 23:59:59` (the timezone is set to your local timezone as default).
-
-#### Format
-
-``` sh
-hand event-times <input_file> [--deadline="yyyy-mm-dd"]
-```
-
-__input-file__: file contains list of `repo-hash` .
-
-__repo-hash__ : in the format of `<repo>:<git commit hash>` , (for example: hw0-ianre657:cb75e99)
-
-Github API use the first 7 characters of a commit's SHA-1 value to communicate, so the hash we used here is in the length of 7.
-
-> The input pairs `repo:hash` could be retrieve from [ `Crawl Classroom` ](#crawl-classroom).
-
-__ `--deadline` __: it will use the variable inside `github_config.ini` as default.
-
-__ `--target-team` __ (optional): teams to operate on (use team-slug)
-
-#### Example
+**Example**
 
 ``` sh
 hand event-times  --target-team="2020-inservice-students" --deadline="2019-11-12 23:59:59"  hw1-handin-0408.txt
 ```
 
-#### Demo (need to be updated)
 
-<img src="./demos/event_times.gif" alt="event-times-demo-video" width="640">
 
-</details>
-
----
-
-### Announce Grade
+## Announce Grade
 
 Publish feedbacks by creating Issue to student's homework repo.
 
-<details><summary><b>Show Detail Information</b></summary>
+This sciprt requires you to
+  + Use a `GoogleSpreadSheet` to record every student's grade inside a strictly named tab.
+  + Strictly structured Github repository.
 
-#### Explanation
 
-In every homework project, we would create a git repository for every student. Take homework `hw3` with two students `Anna` and `Bella` for example, we expect there would be two repos under our github organization, which is `hw3-Anna` and `hw3-Bella` .
-During our grading process, T. A.s would record every grade in a google sheet with a tab named `hw3` and a markdown file for each student in every assignment as their feedbacks.
-After their homeworks being graded, we use this code to publish student's grade by creating `Issue` s named `Grade for hw3` to each of their github repositories.
+**Explanation**
 
-The markdown file for feedbacks contains python template strings, and those strings are the column names inside our google sheet tab `hw3` . One template string we used is students grades, this makes managing grades more easily.
+In our scheme, each student would get a git repository for every homework project.<br>
 
-To use this code, you need to fufill some assumptions.
+Take homework `hw3` with two students `Anna` and `Bella` for example.<br>
+We expect there would be 2 repos under our GitHub organization, which are `hw3-Anna` and `hw3-Bella`.<br>
 
-Lets say you're about to announce the grade for `hw3` :
+Annoucing the grade for `hw3` actually means to open 1 issue to `hw3-anna` and `hw3-bella` respectively.
 
-* prequisite:
-  1. a git repo to store student feedback templates, which strutured as followed:
+To make sure the script correctly functions:
++ students grade should be recorded in the SpreadSheet with a tab called `hw3`.
++ You should keep a `Markdown` file for each student using their `student-id` as the filename to describe their homework result.
+  + e.g. (if `Anna`'s sutdent-id is `0856039`, then `0856039.md` should record `Anna`'s overall feedbacks).
+  + **Behold: `student-id` should be unique.**
 
-``` bash
-  . Hw-manager # root of your git repo
-  ├── hw3
-  │   └── reports
-  │       ├── 0411276.md
-  │       ├── 0856039.md
-  │       └── 0956323.md
-  └── hw4 # other homework dir
-```
+**Format and Structure for those files**
 
-and inside `0411276.md` , it would be:
++ 0856039.md (`Anna`)
 
-``` markdown
-  # Information
+  ```markdown
+  Hi, @Anna
 
-  + Student Id: ${student_id}
-  + Grade : ${grade}
+  ## Information
+  + Grade: ${grade}
+    + testcase : ${grade_testcase}/100 pts
+    + report : ${grade_report}/5 pts
 
-  # <Some other important things...>
-  ...
-```
+  + Grader: @{grader}
+  + Feedback:
+      Good Job
 
-  2. a google sheet to store student information
+  ## Note
+  If you got any questions about your grade
+  please make a comment stating your arguments below and tag the grader in the comment.
+  ```
 
-    | student_id | grade |
-    | :--------: | :---: |
-    |  0856039   |  93   |
-    |  0411276   |  80   |
+  This markdown file contains python template strings(`${grade}`),<br>
+  These strings are the column names inside your SpreadSheet tab `hw3`.
 
-#### Config file
++ Structure of the GitHub Repo:
+  ``` markdown
+    . Hw-manager # root of your git repo (the name is configured in `$HOME/.invisible-hand/config.toml`)
+    ├── hw3
+    │   └── reports
+    │       ├── 0411276.md
+    │       ├── 0856039.md (**Anna**)
+    └── hw4 # other homework dir
+  ```
 
-* __github_config.ini__
++ Structure of the Google SpreadSheet
+  | student_id | grade | grade_report | grade_testcase | grader |
+  | :--------: | :---: | :----------: | :------------: | :----: |
+  |  0856039   |  93   |      5       |       87       |  @TA1  |
+  |  0411276   |  80   |      5       |       75       |  @TA2  |
+
+
+### Config file
+
+* **config.toml**
   + `[github]:personal_access_token`
   + `[github]:organization`
   + `[announce_grade]:feedback_source_repo` (e.x.: Hw-manager)
-* __gsheet_config.ini__
   + `[google_spreadsheet]:spreadsheet_id`
-* __client_secret.json__ (follow [here](https://pygsheets.readthedocs.io/en/stable/authorization.html) to download your oauth2 secret file and renamed it to __client_secret.json__)
+* **client_secret.json** (follow [here](https://pygsheets.readthedocs.io/en/stable/authorization.html) to download your oauth2 secret file and renamed it to **client_secret.json**)
 
-#### instructions to follow
+#### Instructions to follow
 
 1. Edit config files properly.
 2. Create feedbacks for students in your `feedback_source_repo`
-3. use this script
+   1. **Make sure you commit and push the feedbacks to `master` branch**
+   2. Fill out the SpreadSheet
+3. Use this script
+   1. For testing, it's recommended to use the `--only-id` option
 
-#### Format
+       ```sh
+       hand announce-grade <hw_title> [--only-id 👨‍🎓student-id]
+       ```
 
-``` sh
-hand announce-grade <hw_title> [--only-id <student_id>]
-```
 
-option:
-
-`--only-id` : only patch to this student id
-
-#### Example
-
-``` sh
-hand announce-grade hw3 --only-id 0411276
-```
-
-</details>
-
----
+[event-times]: #event-times
+[add-students]: #add-students
+[patch-project]: #patch-project
+[crawl-classroom]: #crawl-classroom
+[announce-grade]: #announce-grade

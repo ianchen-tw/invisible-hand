@@ -75,7 +75,7 @@ BaseURL = "https://classroom.github.com"
 
 def crawl_classroom(
     hw_title=typer.Argument(..., help="homework submission to crawl"),
-    output: str = typer.Argument(..., help="filename to output your resule"),
+    output: str = typer.Argument(..., help="filename to output your result"),
     classroom_id: Optional[str] = typer.Option(None, show_default=True),
     login: Optional[str] = typer.Option(None),
     passwd: Optional[str] = typer.Option(

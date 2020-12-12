@@ -12,7 +12,6 @@ class Config(BaseModel):
 
     class Google(BaseModel):
         spreadsheet_url: str
-        cred_filename: str
 
     class CrawlClassroom(BaseModel):
         login: str
@@ -45,9 +44,7 @@ class Config(BaseModel):
                 personal_access_token="your-github-personal-access-token",
                 organization="compiler-s20",
             ),
-            google_spreadsheet=Config.Google(
-                spreadsheet_url="your-spreadsheet-id", cred_filename="client_secret.json"
-            ),
+            google_spreadsheet=Config.Google(spreadsheet_url="your-spreadsheet-id"),
             crawl_classroom=Config.CrawlClassroom(
                 login="your-github-id", classroom_id="classroom-id-in-url"
             ),

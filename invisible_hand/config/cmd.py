@@ -41,11 +41,12 @@ def create():
 
 @app.command("copy-client-secret")
 def copy_client_secret(
-    file_path: str = typer.Argument(default=..., help="Path to your client_secret file"),
+    src_path: Path = typer.Argument(
+        default=..., metavar="📁file", help="Path to your client_secret file"
+    ),
 ):
     """Copy client_secret.json to cache folder"""
     global manager
-    src_path = Path(file_path)
     dst_path = manager.google_client_secret_path
     if not src_path.exists():
         typer.echo(f"File not exists: {src_path}")

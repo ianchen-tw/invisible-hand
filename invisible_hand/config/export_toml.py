@@ -1,4 +1,5 @@
 from typing import Dict, Optional
+from requests.api import head
 
 from tomlkit import comment, document, dumps, nl, table
 
@@ -20,9 +21,11 @@ def add_commented_section(
     """ Add a section with comment
     """
 
-    def build_table():
+    def build_table(header=None):
         try:
             t = table()
+            if header:
+                t.add(comment(header))
 
             for k, v in dic.items():
                 if isinstance(v, Dict):
@@ -41,19 +44,34 @@ def add_commented_section(
             raise _ERR_NON_VAILD_DEFAULT_CFG
         return t
 
-    if section_comment:
-        docu.add(comment(section_comment))
-
-    docu.add(section_name, build_table())
+    docu.add(section_name, build_table(header=section_comment))
 
 
 def export_default_config() -> str:
     """ Generate the default config file
     """
+
+    def add_big_title(docu, title: str, width: int = 50):
+        def side(width):
+            return "|" + " " * (width - 2) + "|"
+
+        lines = [
+            "=" * width,
+            side(width),
+            f"|{title.center(width-2)}|",
+            side(width),
+            "=" * width,
+        ]
+        for _ in range(3):
+            docu.add(nl())
+        for line in lines:
+            docu.add(comment(line))
+
     default_cfg = Config.get_default()
     docu = document()
     docu.add(comment("Config file for invisible-hand"))
     docu.add(comment("each section define the corresponding default config for scripts"))
+    add_big_title(docu, "Env Configuration")
 
     add_commented_section(
         docu=docu,
@@ -76,19 +94,16 @@ def export_default_config() -> str:
     add_commented_section(
         docu=docu,
         section_name="google_spreadsheet",
-        dic={
-            "spreadsheet_url": default_cfg.google_spreadsheet.spreadsheet_url,
-            "cred_filename": default_cfg.google_spreadsheet.cred_filename,
-        },
+        section_comment="You need to config this section before using `hand annouce-grade`",
+        dic={"spreadsheet_url": default_cfg.google_spreadsheet.spreadsheet_url,},
     )
+
+    add_big_title(docu, "Scripts Configuration")
 
     add_commented_section(
         docu=docu,
-        section_name="crawl_classroom",
-        dic={
-            "login": default_cfg.crawl_classroom.login,
-            "classroom_id": default_cfg.crawl_classroom.classroom_id,
-        },
+        section_name="add_students",
+        dic={"default_team_slug": default_cfg.add_students.default_team_slug},
     )
 
     add_commented_section(
@@ -99,14 +114,32 @@ def export_default_config() -> str:
 
     add_commented_section(
         docu=docu,
-        section_name="add_students",
-        dic={"default_team_slug": default_cfg.add_students.default_team_slug},
+        section_name="crawl_classroom",
+        dic={
+            "login": {
+                "comment": "Your login id in Github Classroom",
+                "value": default_cfg.crawl_classroom.login,
+            },
+            "classroom_id": {
+                "comment": "id field of your classroom RESTful page URL.",
+                "value": default_cfg.crawl_classroom.classroom_id,
+            },
+        },
     )
 
     add_commented_section(
         docu=docu,
         section_name="event_times",
-        dic={"deadline": default_cfg.event_times.deadline},
+        dic={
+            "deadline": {
+                "comments": [
+                    "Deadline for homework, in ISO8601 compatible format",
+                    "For example `2019-11-12 23:59:59` (the timezone is set to your local timezone as default)",
+                    "Or simply `2019-11-12`",
+                ],
+                "value": default_cfg.event_times.deadline,
+            }
+        },
     )
 
     add_commented_section(
