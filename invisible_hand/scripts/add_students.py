@@ -139,24 +139,13 @@ def add_students(
         print_table(invalid_handles)
     non_member_valid_users = list(set(outside_users) - set(invalid_handles))
 
-    # membership info
-    spinner.info("Check Membership information")
-    users_in_pending, users_to_invite = find_outside_members(
-        non_member_valid_users, spinner=spinner, team=team, dry=dry
-    )
-    spinner.succeed("Check Membership information")
-
-    if len(users_in_pending) > 0:
-        print(f"Users already in pending state (total:{len(users_in_pending)}):")
-        print_table(users_in_pending)
-
-    print(f"Users to add (total:{len(users_to_invite)})")
-    print_table(users_to_invite)
+    print(f"Users to add (total:{len(non_member_valid_users)})")
+    print_table(non_member_valid_users)
     print("-" * 30)
 
     spinner.info("start to invite users")
     success_user, failed_users = invite_user_to_team(
-        team=team, users=users_to_invite, spinner=spinner
+        team=team, users=non_member_valid_users, spinner=spinner
     )
     if len(failed_users) > 0:
         print("Users failed to add")
@@ -181,29 +170,6 @@ def invalid_user_handles(
             invalid.append(user_name)
             spinner.fail(text)
     return invalid
-
-
-def find_outside_members(
-    user_handles: List[str], spinner, team: Team, dry: bool = False
-) -> Tuple[List[str], List[str]]:
-    """return two type of members,
-        1. have invited but still in pending state
-        2. not invited, not-organization users
-        """
-    pending_users, outside_users = [], []
-    total = len(user_handles)
-    for idx, username in enumerate(user_handles, start=1):
-        skip = "" if not dry else "[skip]: "
-        spinner.start(f"{skip}{idx}/{total}: {username}")
-        res = team.get_memberships(username)
-        if res.status_code == 200:
-            state = res.json()["state"]
-            if state == "pending":
-                pending_users.append(username)
-            elif state == "unknown":
-                outside_users.append(username)
-    return pending_users, outside_users
-
 
 def invite_user_to_team(
     team: Team, users: List[str], spinner
