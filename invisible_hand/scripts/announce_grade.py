@@ -46,7 +46,7 @@ def announce_grade(
     only_id: Optional[str] = typer.Option(default=None, help="only id to announce"),
     token: Optional[str] = opt_github_token,
     org: str = opt_gh_org,
-    dry: str = typer.Option(
+    dry: bool = typer.Option(
         False, "--dry", help="dry run, do not publish result to the remote"
     ),
     yes: bool = opt_all_yes,
