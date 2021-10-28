@@ -69,7 +69,9 @@ def export_default_config() -> str:
     default_cfg = Config.get_default()
     docu = document()
     docu.add(comment("Config file for invisible-hand"))
-    docu.add(comment("each section define the corresponding default config for scripts"))
+    docu.add(
+        comment("each section define the corresponding default config for scripts")
+    )
     add_big_title(docu, "Env Configuration")
 
     add_commented_section(

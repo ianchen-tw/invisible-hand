@@ -150,7 +150,9 @@ def query_repos_cached(
         return scanner_cache[github_organization]["Contents"]
     else:
         if verbose:
-            print("Cached result for " + github_organization + " is missing or outdated")
+            print(
+                "Cached result for " + github_organization + " is missing or outdated"
+            )
 
     if verbose:
         sys.stdout.write("Getting repo list from GitHub")

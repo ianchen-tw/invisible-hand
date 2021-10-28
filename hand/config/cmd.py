@@ -88,7 +88,9 @@ def edit(editor: str = os.getenv("EDITOR", default="code")):
 
 @app.command()
 def remove(
-    yes: bool = typer.Option(False, "--yes", help="confirm to remove", show_default=False)
+    yes: bool = typer.Option(
+        False, "--yes", help="confirm to remove", show_default=False
+    )
 ):
     """Remove related data completely"""
     global manager

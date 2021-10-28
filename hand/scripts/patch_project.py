@@ -14,11 +14,7 @@ from git.objects.commit import Commit
 from halo import Halo
 
 from hand.config import app_context
-from hand.ensures import (
-    ensure_config_exists,
-    ensure_gh_token,
-    ensure_git_cached,
-)
+from hand.ensures import ensure_config_exists, ensure_gh_token, ensure_git_cached
 from ..utils.github_scanner import (
     get_github_endpoint_paged_list,
     github_headers,

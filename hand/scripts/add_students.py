@@ -28,7 +28,8 @@ def print_table(data):
 
 def check_is_github_user(github_id, github_token) -> bool:
     res = requests.get(
-        f"https://api.github.com/users/{github_id}", headers=github_headers(github_token),
+        f"https://api.github.com/users/{github_id}",
+        headers=github_headers(github_token),
     )
     return res.status_code == 200
 

@@ -46,12 +46,13 @@ autoflake = "^1.4"
 black = "^19.10b0"
 isort = "^5.6.4"
 mkdocs-material = "^7.3.5"
+mypy = "^0.910"
 pyflakes = "^2.2.0"
 pytest = "^6.1.1"
 pytest-cov = "^2.10.1"
 
 [tool.black]
-line-length = 90
+line-length = 88
 
 exclude = '''
 /(
@@ -61,8 +62,14 @@ exclude = '''
 '''
 
 [tool.isort]
+ensure_newline_before_comments = true
+force_grid_wrap = 0
+include_trailing_comma = true
+line_length = 88
+multi_line_output = 3
 no_lines_before = "LOCALFOLDER"
 sections = 'FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER'
+use_parentheses = true
 
 [build-system]
 build-backend = "poetry.masonry.api"

@@ -64,7 +64,9 @@ def grant_read_access(
 
     builder = pbar_builder()
     builder.set_config(total=len(repo_names))
-    with builder.build(desc="fired") as fired, builder.build(desc="returned") as returned:
+    with builder.build(desc="fired") as fired, builder.build(
+        desc="returned"
+    ) as returned:
 
         async def subscribe_to_repo(team: Team, repo_name: str):
             res = await team.add_team_repository_async(repo_name, permission="pull")
