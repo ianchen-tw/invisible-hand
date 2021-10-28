@@ -4,7 +4,7 @@ import trio
 import typer
 from tqdm import tqdm
 
-from invisible_hand.config import app_context
+from hand.config import app_context
 from ..ensures import ensure_config_exists, ensure_gh_token
 from ..utils.github_entities import Team
 from ..utils.github_scanner import query_matching_repos

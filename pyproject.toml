@@ -7,11 +7,11 @@ readme = "README.md"
 version = "0.3.1"
 
 packages = [
-  {include = "invisible_hand"},
+  {include = "hand"},
 ]
 
 [tool.poetry.scripts]
-hand = "invisible_hand.cli:app"
+hand = "hand.cli:app"
 
 [tool.poetry.dependencies]
 attrs = "^20.3.0"
@@ -45,10 +45,10 @@ xlsxwriter = "^1.3.3"
 autoflake = "^1.4"
 black = "^19.10b0"
 isort = "^5.6.4"
+mkdocs-material = "^7.3.5"
 pyflakes = "^2.2.0"
 pytest = "^6.1.1"
 pytest-cov = "^2.10.1"
-mkdocs-material = "^7.3.5"
 
 [tool.black]
 line-length = 90

@@ -2,8 +2,8 @@ from typing import Optional
 
 import typer
 
-from invisible_hand.config import app_context
-from invisible_hand.errors import ERR_CANNOT_FETCH_TEAM
+from hand.config import app_context
+from hand.errors import ERR_CANNOT_FETCH_TEAM
 
 
 def dev(

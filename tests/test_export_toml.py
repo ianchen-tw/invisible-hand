@@ -1,7 +1,7 @@
 import pytest
 from tomlkit import document, loads
 
-from invisible_hand.config.export_toml import (
+from hand.config.export_toml import (
     _ERR_NON_VAILD_DEFAULT_CFG,
     Config,
     add_commented_section,

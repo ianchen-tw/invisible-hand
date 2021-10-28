@@ -17,7 +17,7 @@ from rich.console import Console
 from rich.table import Table
 from tabulate import tabulate
 
-from invisible_hand.config import app_context
+from hand.config import app_context
 from ..ensures import ensure_config_exists, ensure_gh_token
 from ..utils.github_entities import Team
 from ..utils.github_scanner import (

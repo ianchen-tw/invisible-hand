@@ -1,12 +1,12 @@
 import pytest
 from unittest.mock import patch
 
-from invisible_hand.utils.google_student import Gstudents
-from invisible_hand.utils.google_student import pygsheetInteractor
+from hand.utils.google_student import Gstudents
+from hand.utils.google_student import pygsheetInteractor
 
 import pygsheets
 
-from invisible_hand.errors import ERR_UNIQUE_STUDENT_ID, ERR_REQUIRE_NO_SPACE
+from hand.errors import ERR_UNIQUE_STUDENT_ID, ERR_REQUIRE_NO_SPACE
 
 # TODO:
 # test if pygsheet work as supposed

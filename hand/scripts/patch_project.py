@@ -13,8 +13,8 @@ from git import Repo
 from git.objects.commit import Commit
 from halo import Halo
 
-from invisible_hand.config import app_context
-from invisible_hand.ensures import (
+from hand.config import app_context
+from hand.ensures import (
     ensure_config_exists,
     ensure_gh_token,
     ensure_git_cached,

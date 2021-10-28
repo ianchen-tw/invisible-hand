@@ -14,9 +14,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from invisible_hand.config import app_context
-from invisible_hand.ensures import ensure_config_exists
-from invisible_hand.errors import ERR_CHROME_DRIVER_NOT_INSTALLED
+from hand.config import app_context
+from hand.ensures import ensure_config_exists
+from hand.errors import ERR_CHROME_DRIVER_NOT_INSTALLED
 
 spinner = Halo(stream=sys.stderr)
 

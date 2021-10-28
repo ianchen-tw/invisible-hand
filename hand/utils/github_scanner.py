@@ -19,7 +19,7 @@ import requests
 import trio
 from requests.models import Response
 
-from invisible_hand.config import app_context
+from hand.config import app_context
 
 scanner_cache = {}
 

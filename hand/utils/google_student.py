@@ -5,8 +5,8 @@ import pygsheets
 from pydantic import BaseModel
 from xlsxwriter.utility import xl_col_to_name
 
-from invisible_hand.config import app_context
-from invisible_hand.ensures import ensure_client_secret_json_exists, ensure_config_exists
+from hand.config import app_context
+from hand.ensures import ensure_client_secret_json_exists, ensure_config_exists
 from ..errors import ERR_REQUIRE_NO_SPACE, ERR_UNIQUE_STUDENT_ID
 
 

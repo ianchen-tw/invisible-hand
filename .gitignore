@@ -1,11 +1,10 @@
-# invisible_hand/config/*
+# hand/config/*
 /*.ini
-!invisible_hand/config/template
+!hand/config/template
 client_secret.json
 sheets.googleapis.com-python.json
 .github-classroom-utls.*
 .vscode
-
 
 # mac gitignore
 

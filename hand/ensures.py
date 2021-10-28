@@ -2,8 +2,8 @@ import subprocess as sp
 
 import httpx
 
-from invisible_hand.config import app_context
-from invisible_hand.errors import (
+from hand.config import app_context
+from hand.errors import (
     ERR_CONFIG_NOT_EXISTS,
     ERR_GIT_CREDENTIAL_HELPER_NOT_FOUND,
     ERR_GOOGLE_CLIENT_SECRET_NOT_EXISTED,

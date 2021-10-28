@@ -7,16 +7,16 @@ clean:
 better: format lint
 
 format:
-	isort --force-single-line-imports invisible_hand
+	isort --force-single-line-imports hand
 
 	# remove unused imports
-	autoflake --remove-all-unused-imports --recursive --remove-unused-variables --in-place invisible_hand --exclude=__init__.py
+	autoflake --remove-all-unused-imports --recursive --remove-unused-variables --in-place hand --exclude=__init__.py
 
 	# sort and gather imports
-	isort invisible_hand
+	isort hand
 
 	# formatter
-	black invisible_hand
+	black hand
 
 format-test-src:
 	isort --force-single-line-imports tests
@@ -31,7 +31,7 @@ format-test-src:
 	black tests
 
 lint:
-	pyflakes invisible_hand
+	pyflakes hand
 	pyflakes tests
 
 test:
@@ -39,4 +39,4 @@ test:
 
 test-cov:
 	# see test coverage report
-	pytest --cov=invisible_hand tests
+	pytest --cov=hand tests

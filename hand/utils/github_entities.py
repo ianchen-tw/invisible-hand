@@ -5,8 +5,8 @@ import httpx
 import requests
 from requests.models import Response
 
-from invisible_hand.config import app_context
-from invisible_hand.errors import ERR_CANNOT_FETCH_TEAM
+from hand.config import app_context
+from hand.errors import ERR_CANNOT_FETCH_TEAM
 from .github_scanner import (
     get_github_endpoint,
     get_github_endpoint_paged_list,

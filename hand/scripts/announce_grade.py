@@ -15,7 +15,7 @@ import trio
 import typer
 from halo import Halo
 
-from invisible_hand.config import app_context
+from hand.config import app_context
 from ..ensures import ensure_config_exists, ensure_gh_token
 from ..utils.github_scanner import get_github_endpoint_paged_list_async
 from ..utils.google_student import Gstudents

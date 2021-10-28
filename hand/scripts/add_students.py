@@ -8,7 +8,7 @@ from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
 
-from invisible_hand.config import app_context
+from hand.config import app_context
 from ..ensures import ensure_config_exists, ensure_gh_token
 from ..utils.github_entities import Team
 from ..utils.github_scanner import github_headers
@@ -170,6 +170,7 @@ def invalid_user_handles(
             invalid.append(user_name)
             spinner.fail(text)
     return invalid
+
 
 def invite_user_to_team(
     team: Team, users: List[str], spinner
