@@ -1,0 +1,1005 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.3.6">
+    
+    
+      
+        <title>My Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.a57b2b03.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.3f5d1f46.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    <script>function __prefix(e){return new URL(".",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#hand" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="My Docs" class="md-header__button md-logo" aria-label="My Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            My Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="My Docs" class="md-nav__button md-logo" aria-label="My Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    My Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Home
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        Home
+      </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-install-this-tool-via-pip" class="md-nav__link">
+    1. Install this tool via pip
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-install-chromedriver" class="md-nav__link">
+    2. Install chromedriver
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    Getting Started
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-references" class="md-nav__link">
+    Quick references
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-students" class="md-nav__link">
+    Add Students
+  </a>
+  
+    <nav class="md-nav" aria-label="Add Students">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#faq" class="md-nav__link">
+    FAQ
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#patch-project" class="md-nav__link">
+    Patch Project
+  </a>
+  
+    <nav class="md-nav" aria-label="Patch Project">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-another-repo-with-name-tmpl-hw3-revise-to-update-your-template" class="md-nav__link">
+    1. Create another repo with name tmpl-hw3-revise to update your template
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-inside-tmpl-hw3-revise" class="md-nav__link">
+    2. Inside tmpl-hw3-revise
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-open-github-classroom" class="md-nav__link">
+    3. Open GitHub Classroom
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-create-an-pr-to-your-template-repo-hw3" class="md-nav__link">
+    4. Create an PR to your template repo (hw3)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-accept-the-pr-in-your-template-repository-tmpl-hw3" class="md-nav__link">
+    5. Accept the PR in your template repository (tmpl-hw3)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-create-prs-to-students-template-repositories-hw3-their-github-id" class="md-nav__link">
+    6. Create PRs to students template repositories ( hw3-&lt;their github id&gt; )
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-merge-the-revision-branch-2-revise-for-node-definition-inside-tmpl-hw3" class="md-nav__link">
+    7. Merge the revision branch 2-revise-for-node-definition inside tmpl-hw3
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-reactivate-the-invitation-url" class="md-nav__link">
+    8. Reactivate the invitation URL
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#crawl-classroom" class="md-nav__link">
+    Crawl Classroom
+  </a>
+  
+    <nav class="md-nav" aria-label="Crawl Classroom">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-file" class="md-nav__link">
+    Config File
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#faq_1" class="md-nav__link">
+    FAQ
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-times" class="md-nav__link">
+    Event Times
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#announce-grade" class="md-nav__link">
+    Announce Grade
+  </a>
+  
+    <nav class="md-nav" aria-label="Announce Grade">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-file_1" class="md-nav__link">
+    Config file
+  </a>
+  
+    <nav class="md-nav" aria-label="Config file">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#instructions-to-follow" class="md-nav__link">
+    Instructions to follow
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="專案邏輯" class="md-nav__link">
+        None
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="參與開發" class="md-nav__link">
+        None
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-install-this-tool-via-pip" class="md-nav__link">
+    1. Install this tool via pip
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-install-chromedriver" class="md-nav__link">
+    2. Install chromedriver
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    Getting Started
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-references" class="md-nav__link">
+    Quick references
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-students" class="md-nav__link">
+    Add Students
+  </a>
+  
+    <nav class="md-nav" aria-label="Add Students">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#faq" class="md-nav__link">
+    FAQ
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#patch-project" class="md-nav__link">
+    Patch Project
+  </a>
+  
+    <nav class="md-nav" aria-label="Patch Project">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-another-repo-with-name-tmpl-hw3-revise-to-update-your-template" class="md-nav__link">
+    1. Create another repo with name tmpl-hw3-revise to update your template
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-inside-tmpl-hw3-revise" class="md-nav__link">
+    2. Inside tmpl-hw3-revise
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-open-github-classroom" class="md-nav__link">
+    3. Open GitHub Classroom
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-create-an-pr-to-your-template-repo-hw3" class="md-nav__link">
+    4. Create an PR to your template repo (hw3)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-accept-the-pr-in-your-template-repository-tmpl-hw3" class="md-nav__link">
+    5. Accept the PR in your template repository (tmpl-hw3)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-create-prs-to-students-template-repositories-hw3-their-github-id" class="md-nav__link">
+    6. Create PRs to students template repositories ( hw3-&lt;their github id&gt; )
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-merge-the-revision-branch-2-revise-for-node-definition-inside-tmpl-hw3" class="md-nav__link">
+    7. Merge the revision branch 2-revise-for-node-definition inside tmpl-hw3
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-reactivate-the-invitation-url" class="md-nav__link">
+    8. Reactivate the invitation URL
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#crawl-classroom" class="md-nav__link">
+    Crawl Classroom
+  </a>
+  
+    <nav class="md-nav" aria-label="Crawl Classroom">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-file" class="md-nav__link">
+    Config File
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#faq_1" class="md-nav__link">
+    FAQ
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-times" class="md-nav__link">
+    Event Times
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#announce-grade" class="md-nav__link">
+    Announce Grade
+  </a>
+  
+    <nav class="md-nav" aria-label="Announce Grade">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-file_1" class="md-nav__link">
+    Config file
+  </a>
+  
+    <nav class="md-nav" aria-label="Config file">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#instructions-to-follow" class="md-nav__link">
+    Instructions to follow
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                <h1 id="hand">Hand</h1>
+<p>Hand 是一個用來管理 Github Organization 下作業的工具集。
+在 Hand 的處理邏輯中，除了 Github 本身之外，也同時會使用到 Google Sheet, GithubClassroom。</p>
+<h2 id="installation">Installation</h2>
+<h4 id="1-install-this-tool-via-pip">1. Install this tool via pip</h4>
+<p><code>pip install invisible-hand</code></p>
+<p>Use <code>hand -h</code> to test if it is installed</p>
+<pre><code>╰─❯ hand -h
+Usage: hand [OPTIONS] COMMAND [ARGS]...
+
+  Manage your classroom under Github organization.
+
+Options:
+  --custom-base TEXT    Use custom base folder for configs
+  --install-completion  Install completion for the current shell.
+  --show-completion     Show completion for the current shell, to copy it or
+                        customize the installation.
+
+  -h, --help            Show this message and exit.
+
+Commands:
+  add-students       Invite students to join our Github organization
+  announce-grade     Announce student grades to each hw repo
+  config             Config File utilities
+  crawl-classroom    Get student's submissions from Github Classroom
+  event-times        Retrieve information about late submissions &lt;repo-
+                     hash&gt;...
+
+  grant-read-access  Make TAs being able to read all homework repos...
+  patch-project      Patch to student homeworks
+</code></pre>
+<h4 id="2-install-chromedriver">2. Install chromedriver</h4>
+<ul>
+<li>Mac : <code>brew cask install chromedriver</code></li>
+<li>Ubuntu : <code>apt install chromium-chromedriver</code></li>
+</ul>
+<h2 id="getting-started">Getting Started</h2>
+<p><strong>1. Create config file</strong></p>
+<p>The main config file is located in <code>$HOME/.invisible-hand/config.toml</code>. <br>
+Run <code>hand config create</code> to create a template and use <code>hand config edit</code> to open it with an editor.</p>
+<p><strong>2. <code>(Not required)</code> Getting your <code>client_secret.json</code> for accessing GoogleSheets</strong></p>
+<p>To run the command:<a href="#announce-grade"> <code>Announce Grade</code> </a>, follow the steps below to setup your environment first</p>
+<ol>
+<li>Follow <a href="https://pygsheets.readthedocs.io/en/stable/authorization.html">Authorization for pygsheets</a> to get your credential file (<code>client_secret.json</code>)</li>
+<li>
+<p>Locate your secret file and use <code>hand config copy-client-secret YOUR-SECRET-FILE</code> to copy it into the cache.</p>
+<p>This command would automatically rename your secret file to (<code>$HOME/.invisible-hand/client_secret.json</code>)</p>
+</li>
+</ol>
+<h2 id="quick-references">Quick references</h2>
+<p>(This tool supports auto-completion, use <code>hand --install-completion</code> to add completion support to your shell)</p>
+<ul>
+<li><code>hand</code>: The root command, use <code>-h</code> to see more information</li>
+<li><code>config</code>: subcommand to handle config files, use <code>-h</code> to see more information<ul>
+<li><code>create</code>: Create a config file from template to <code>$HOME/.invisible-hand/config.toml</code></li>
+<li><code>check</code>: Check if the format your config file is valid</li>
+<li><code>path</code>: Show the root path to your config folder, default to <code>$HOME/.invisble-hand</code></li>
+<li><code>edit</code>: Open your config file with your default editor. (use <code>--editor &lt;your editor&gt;</code> to open your another one)</li>
+<li><code>copy-client-secret</code>: Copy Google's <code>client_secret.json</code> to the cache folder.</li>
+<li>use <code>hand config copy-client-secret -h</code> to see more information</li>
+</ul>
+</li>
+<li><a href="#add-students"><code>add-students 🧑‍💼student1 🦸‍♂️student2 ...</code></a>: Invite users into your GitHub organization<ul>
+<li><code>🧑‍💼student</code>- GitHub handle of the student</li>
+</ul>
+</li>
+<li><code>grant-read-access 📝 hw-title</code>:  Grant TA's group read access to all repo with such prefix.<ul>
+<li><code>📝 hw-title</code>- title prefix of the homework (e.g. <code>hw3</code>)</li>
+</ul>
+</li>
+<li><a href="#patch-project"><code>patch-project 📝 hw-title  🚧 patch-branch</code></a>: Patch project to Students homeworks</li>
+<li><a href="#crawl-classroom"><code>crawl-classroom 📝 hw-title 📦 submission-file</code></a>: Crawl submission status of students on GitHub Classroom<ul>
+<li><code>📦 submission-file</code>- file to store submission output</li>
+</ul>
+</li>
+<li><a href="#event-times"><code>event-times 📦 submission-file</code></a>: Check if there's late submissions</li>
+<li><a href="#announce-grade"><code>announce-grade 📝 hw-title</code></a>: Announce grade to students by opening issues in their repos</li>
+</ul>
+<hr />
+<h2 id="add-students">Add Students</h2>
+<h4 id="faq">FAQ</h4>
+<ul>
+<li>
+<p>Some students report that they didn't get the invitation email.</p>
+<p>Invite student into your organization from their email. This should be Github's issue.</p>
+<blockquote>
+<p>about 2 of 80 students got this issue from our previous experience.</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="patch-project">Patch Project</h2>
+<p>Patch to student homework repositories.</p>
+<p><strong>Workflow</strong></p>
+<p>Take homework : <strong><code>hw3</code></strong>(the title of your homework in github classroom) for example: <br>
+The repository: <strong><code>tmpl-hw3</code></strong> would be your template for initializing homeworks.</p>
+<h4 id="1-create-another-repo-with-name-tmpl-hw3-revise-to-update-your-template">1. Create another repo with name <strong><code>tmpl-hw3-revise</code></strong> to update your template</h4>
+<h4 id="2-inside-tmpl-hw3-revise">2. Inside <strong><code>tmpl-hw3-revise</code></strong></h4>
+<ol>
+<li>Create a revision branch <strong><code>2-revise-for-node-definition</code></strong> (whatever you like)</li>
+</ol>
+<p align="center">
+<img src="./imgs/patch-branches.png" alt="name of the branch" width="640">
+</p>
+
+<ol>
+<li>Create an issuse with the identiacal title <strong><code>2-revise-for-node-definition</code> )</strong></li>
+<li>the content of that issue would become the content of your PR message.</li>
+</ol>
+<p align="center">
+<img src="./imgs/patch-template-issue.png" alt=" template issue" width="640">
+</p>
+
+<h4 id="3-open-github-classroom">3. Open GitHub Classroom</h4>
+<p>Select your assignment (<strong><code>hw3</code></strong>) and disable <code>assignment invitation URL</code> of <strong><code>hw3</code></strong></p>
+<p align="center">
+<img src="./imgs/patch-diable-hw.png" alt="disable invitation url" width="640">
+</p>
+
+<h4 id="4-create-an-pr-to-your-template-repo-hw3">4. Create an PR to your template repo (<strong><code>hw3</code></strong>)</h4>
+<pre><code class="language-sh">hand patch-project hw3 --only-repo=&quot;tmpl-hw3&quot; 2-revise-for-node-definition
+</code></pre>
+<h4 id="5-accept-the-pr-in-your-template-repository-tmpl-hw3">5. Accept the PR in your template repository (<strong><code>tmpl-hw3</code></strong>)</h4>
+<p>After that, enable the <code>assignment invitation URL</code> of <code>hw3</code> in GitHub Classroom.<br>
+Now you have succcessfully updated your template repo.</p>
+<h4 id="6-create-prs-to-students-template-repositories-hw3-their-github-id">6. Create PRs to students template repositories ( <code>hw3-&lt;their github id&gt;</code> )</h4>
+<p>Patch to every repository that uses <strong>hw3</strong> as the prefix under your GitHub organization.</p>
+<pre><code class="language-sh">hand patch-project hw3 2-revise-for-node-definition
+</code></pre>
+<h4 id="7-merge-the-revision-branch-2-revise-for-node-definition-inside-tmpl-hw3">7. Merge the revision branch <strong><code>2-revise-for-node-definition</code></strong> inside <code>tmpl-hw3</code></h4>
+<p>After this step, all documents are updated</p>
+<h4 id="8-reactivate-the-invitation-url">8. Reactivate the invitation URL</h4>
+<p align="center">
+<img src="./imgs/patch-enable-hw.png" alt="reactivate invitation url" width="640">
+</p>
+
+<h2 id="crawl-classroom">Crawl Classroom</h2>
+<p>Crawling homework submission data from Github Classroom</p>
+<p>This is a web crawler for Github Classroom, which is the input of <a href="#event-times"> <code>Event Times</code> </a></p>
+<h3 id="config-file">Config File</h3>
+<ul>
+<li><strong>config.toml</strong>:</li>
+<li><code>[crawl_classroom]:login</code> : your login id in Github Classroom</li>
+<li><code>[crawl_classroom]:classroom_id</code> : the id field of your classroom RESTful page URL. (see the image below)</li>
+</ul>
+<p align="center">
+ <img src="./imgs/clsrm_id.png" alt="id field in the url of github classroom" width="640">
+</p>
+
+<h3 id="faq_1">FAQ</h3>
+<ul>
+<li>ChromeDriver</li>
+</ul>
+<p><code>selenium.common.exceptions.SessionNotCreatedException: Message: session not created:
+  This version of ChromeDriver only supports Chrome version 79</code></p>
+<pre><code>upgrade your chromedriver via `brew cask upgrade chromedriver`
+</code></pre>
+<ul>
+<li>All students not submitted<ul>
+<li>Remember to set deadline of hw on the GitHub classroom (note that deadline can only be set at a future time)</li>
+</ul>
+</li>
+</ul>
+<p align="center">
+<strong>Demo</strong><br>
+<img src="./demos/github_classroom_craw.gif" alt="github_classroom_craw" width="640">
+</p>
+
+<h2 id="event-times">Event Times</h2>
+<p>Retrieve information about late submissions</p>
+<p><strong>What it actually does</strong></p>
+<p>Compare the last publish-time of specific git commit in each repository and print out which passed the deadline.</p>
+<p><strong>Example</strong></p>
+<pre><code class="language-sh">hand event-times  --target-team=&quot;2020-inservice-students&quot; --deadline=&quot;2019-11-12 23:59:59&quot;  hw1-handin-0408.txt
+</code></pre>
+<h2 id="announce-grade">Announce Grade</h2>
+<p>Publish feedbacks by creating Issue to student's homework repo.</p>
+<p>This sciprt requires you to
+  + Use a <code>GoogleSpreadSheet</code> to record every student's grade inside a strictly named tab.
+  + Strictly structured Github repository.</p>
+<p><strong>Explanation</strong></p>
+<p>In our scheme, each student would get a git repository for every homework project.<br></p>
+<p>Take homework <code>hw3</code> with two students <code>Anna</code> and <code>Bella</code> for example.<br>
+We expect there would be 2 repos under our GitHub organization, which are <code>hw3-Anna</code> and <code>hw3-Bella</code>.<br></p>
+<p>Annoucing the grade for <code>hw3</code> actually means to open 1 issue to <code>hw3-anna</code> and <code>hw3-bella</code> respectively.</p>
+<p>To make sure the script correctly functions:
++ students grade should be recorded in the SpreadSheet with a tab called <code>hw3</code>.
++ You should keep a <code>Markdown</code> file for each student using their <code>student-id</code> as the filename to describe their homework result.
+  + e.g. (if <code>Anna</code>'s sutdent-id is <code>0856039</code>, then <code>0856039.md</code> should record <code>Anna</code>'s overall feedbacks).
+  + <strong>Behold: <code>student-id</code> should be unique.</strong></p>
+<p><strong>Format and Structure for those files</strong></p>
+<ul>
+<li>0856039.md (<code>Anna</code>)</li>
+</ul>
+<pre><code class="language-markdown">Hi, @Anna
+
+## Information
++ Grade: ${grade}
+  + testcase : ${grade_testcase}/100 pts
+  + report : ${grade_report}/5 pts
+
++ Grader: @{grader}
++ Feedback:
+    Good Job
+
+## Note
+If you got any questions about your grade
+please make a comment stating your arguments below and tag the grader in the comment.
+</code></pre>
+<p>This markdown file contains python template strings(<code>${grade}</code>),<br>
+  These strings are the column names inside your SpreadSheet tab <code>hw3</code>.</p>
+<ul>
+<li>Structure of the GitHub Repo:</li>
+</ul>
+<pre><code class="language-markdown">  . Hw-manager # root of your git repo (the name is configured in `$HOME/.invisible-hand/config.toml`)
+  ├── hw3
+  │   └── reports
+  │       ├── 0411276.md
+  │       ├── 0856039.md (**Anna**)
+  └── hw4 # other homework dir
+</code></pre>
+<ul>
+<li>Structure of the Google SpreadSheet</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">student_id</th>
+<th align="center">grade</th>
+<th align="center">grade_report</th>
+<th align="center">grade_testcase</th>
+<th align="center">grader</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">0856039</td>
+<td align="center">93</td>
+<td align="center">5</td>
+<td align="center">87</td>
+<td align="center">@TA1</td>
+</tr>
+<tr>
+<td align="center">0411276</td>
+<td align="center">80</td>
+<td align="center">5</td>
+<td align="center">75</td>
+<td align="center">@TA2</td>
+</tr>
+</tbody>
+</table>
+<h3 id="config-file_1">Config file</h3>
+<ul>
+<li><strong>config.toml</strong></li>
+<li><code>[github]:personal_access_token</code></li>
+<li><code>[github]:organization</code></li>
+<li><code>[announce_grade]:feedback_source_repo</code> (e.x.: Hw-manager)</li>
+<li><code>[google_spreadsheet]:spreadsheet_id</code></li>
+<li><strong>client_secret.json</strong> (follow <a href="https://pygsheets.readthedocs.io/en/stable/authorization.html">here</a> to download your oauth2 secret file and renamed it to <strong>client_secret.json</strong>)</li>
+</ul>
+<h4 id="instructions-to-follow">Instructions to follow</h4>
+<ol>
+<li>Edit config files properly.</li>
+<li>Create feedbacks for students in your <code>feedback_source_repo</code></li>
+<li><strong>Make sure you commit and push the feedbacks to <code>master</code> branch</strong></li>
+<li>Fill out the SpreadSheet</li>
+<li>Use this script</li>
+<li>
+<p>For testing, it's recommended to use the <code>--only-id</code> option</p>
+<p><code>sh
+   hand announce-grade &lt;hw_title&gt; [--only-id 👨‍🎓student-id]</code></p>
+</li>
+</ol>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        
+          Made with
+          <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+            Material for MkDocs
+          </a>
+        
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": ".", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "assets/javascripts/workers/search.fcfe8b6d.min.js", "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.b1047164.min.js"></script>
+      
+    
+  </body>
+</html>
