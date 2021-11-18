@@ -1,4 +1,4 @@
-from attr import attrib, attrs
+from attr import attrs
 
 
 @attrs(auto_attribs=True, frozen=True)
@@ -13,11 +13,12 @@ class DoCheck:
         """Start checking, will simply stop program if failed"""
         if self.gh_config_valid:
             print("check gh_config_valid")
+            print("check org name")
+            print("check token valid")
 
         if self.google_client_secret_file_exist:
             pass
             # ensure_client_secret_json_exists()
         if self.git_cached:
             print("check git cached")
-            pass
             # ensure_git_cached()

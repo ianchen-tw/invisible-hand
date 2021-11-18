@@ -1,5 +1,7 @@
-from attr import attrs, attrib
-from typing import List, Dict
+from typing import Dict, List
+
+from attr import attrib, attrs
+
 from hand.api.github import GithubAPI
 
 
@@ -40,7 +42,7 @@ class ScriptAddStudents:
     dry_run: bool
 
     def run(self):
-        members = self.step_get_team_members()
+        self.step_get_team_members()
 
         invalids = self.step_check_invalid_handles()
         to_invite = list(set(self.user_handles) - set(invalids))

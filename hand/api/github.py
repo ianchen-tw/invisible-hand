@@ -1,5 +1,6 @@
-from attr import attrs, attrib
-from typing import List, Dict
+from typing import List
+
+from attr import attrs
 
 
 @attrs(auto_attribs=True)

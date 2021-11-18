@@ -1,5 +1,5 @@
-from pydantic import BaseModel
 from dynaconf import Dynaconf
+from pydantic import BaseModel
 
 
 class HandConfig(BaseModel):
@@ -45,4 +45,3 @@ class HandConfig(BaseModel):
 
 _dyna_settings = Dynaconf(settings_files=["config/settings.toml"])
 settings: HandConfig = HandConfig.from_orm(_dyna_settings)
-
