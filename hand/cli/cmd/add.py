@@ -29,6 +29,10 @@ def add_students(
     # add some checks before running the script
     print(f"check student team exists {team}")
 
+    from hand.scripts import Script
     from hand.scripts.add import ScriptAddStudents
 
-    ScriptAddStudents(gh_invite_team=team, user_handles=handles, dry_run=dry).run()
+    script: Script = ScriptAddStudents(
+        gh_invite_team=team, user_handles=handles, dry_run=dry
+    )
+    script.run()

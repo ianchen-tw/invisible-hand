@@ -3,6 +3,7 @@ from typing import Dict, List
 from attr import attrib, attrs
 
 from hand.api.github import GithubAPI
+from ._protocol import Script
 
 
 def unique(arr: List[str]) -> List[str]:
@@ -36,7 +37,7 @@ class TeamInviteExecutor:
 
 
 @attrs(auto_attribs=True)
-class ScriptAddStudents:
+class ScriptAddStudents(Script):
     gh_invite_team: str
     user_handles: List[str] = attrib(converter=unique)
     dry_run: bool
