@@ -5,25 +5,43 @@ from shutil import copy2, which
 import typer
 from pydantic import ValidationError
 
-from .config_manager import ConfigManager
-from .context import app_context
-from .words import STR_CFG_IS_VALID, STR_CFG_NOT_EXISTS
+from hand.config.manager import ConfigManager
+from hand.config.words import STR_CFG_IS_VALID, STR_CFG_NOT_EXISTS
 
-manager: ConfigManager
+
+class SafeManager:
+    def __init__(self):
+        self._manager = None
+
+    @property
+    def manager(self) -> ConfigManager:
+        if self._manager == None:
+            raise AttributeError("manager object")
+        return self._manager
+
+    @manager.setter
+    def set_manager(self, new_manager):
+        self._manager = new_manager
+
+
+ctx = SafeManager()
+
 
 app = typer.Typer(help="Config File utilities")
 
 
-@app.callback()
-def setup_manager():
-    global manager
-    manager = app_context.config_manager
+# @app.callback()
+# def setup_manager():
+#     global ctx
+#     ctx.manager
+#     manager = app_context.config_manager
 
 
 @app.command()
 def create():
     """Create config file"""
-    global manager
+    global ctx
+    manager = ctx.manager
 
     config_path = manager.config_path
     if not manager.config_path.exists():
@@ -46,7 +64,9 @@ def copy_client_secret(
     ),
 ):
     """Copy client_secret.json to cache folder"""
-    global manager
+    global ctx
+    manager = ctx.manager
+
     dst_path = manager.google_client_secret_path
     if not src_path.exists():
         typer.echo(f"File not exists: {src_path}")
@@ -58,7 +78,8 @@ def copy_client_secret(
 @app.command()
 def check():
     """Check if your config file is valid & usable"""
-    global manager
+    global ctx
+    manager = ctx.manager
 
     if not manager.config_path.exists():
         typer.echo(STR_CFG_NOT_EXISTS)
@@ -78,7 +99,9 @@ def check():
 @app.command()
 def edit(editor: str = os.getenv("EDITOR", default="code")):
     """Open config file"""
-    global manager
+    global ctx
+    manager = ctx.manager
+
     if which(editor) is not None:
         os.system(f"{editor} {manager.config_path}")
     else:
@@ -93,7 +116,9 @@ def remove(
     )
 ):
     """Remove related data completely"""
-    global manager
+    global ctx
+    manager = ctx.manager
+
     base_path: Path = manager.get_base_path().resolve()
     confirm = yes or typer.confirm(f"Remove folder : {base_path}?")
     if not confirm:
@@ -106,6 +131,8 @@ def remove(
 @app.command()
 def path():
     """Get the folder for configs"""
-    global manager
+    global ctx
+    manager = ctx.manager
+
     base_path: Path = manager.get_base_path().resolve()
     typer.echo(base_path)

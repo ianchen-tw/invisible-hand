@@ -7,7 +7,7 @@ clean:
 better: format lint
 
 format:
-	isort --force-single-line-imports hand
+	# isort --force-single-line-imports hand
 
 	# remove unused imports
 	autoflake --remove-all-unused-imports --recursive --remove-unused-variables --in-place hand --exclude=__init__.py
@@ -19,7 +19,7 @@ format:
 	black hand
 
 format-test-src:
-	isort --force-single-line-imports tests
+	# isort --force-single-line-imports tests
 
 	# remove unused imports
 	autoflake --remove-all-unused-imports --recursive --remove-unused-variables --in-place tests --exclude=__init__.py

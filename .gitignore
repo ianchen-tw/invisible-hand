@@ -163,3 +163,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Ignore dynaconf secret files
+.secrets.*

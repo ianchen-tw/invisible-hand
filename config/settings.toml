@@ -1,0 +1,32 @@
+# See docs for more information
+# Create a "settings.local.toml" file to override settings
+
+[github]
+org = "<override>"
+token = "<override>"
+
+[google_spreadsheet]
+# Google Spread Sheet
+cred_filename = "client_secret.json"
+url = "<override>"
+
+# Script specific data
+
+[add]
+# Add students to team
+student_team = "<override>"
+
+[grant]
+# Grant read access to ta
+reader_team = "<override>"
+
+[crawl]
+classroom_id = "<override>"
+gh_login = "<override>"
+
+[times]
+compare_deadline = "<override>"
+
+[announce]
+# Announce grade
+feedback_src_repo = "Hw-manager"

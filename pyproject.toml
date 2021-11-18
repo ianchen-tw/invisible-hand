@@ -4,20 +4,25 @@ description = "Automate your workflow with github classroom"
 exclude = ["tests"]
 name = "invisible-hand"
 readme = "README.md"
-version = "0.3.1"
+version = "0.3.2"
+
+classifiers = [
+  "Private :: Do not Upload",
+]
 
 packages = [
   {include = "hand"},
 ]
 
 [tool.poetry.scripts]
-hand = "hand.cli:app"
+hand = "hand.cli.app:app"
 
 [tool.poetry.dependencies]
-attrs = "^20.3.0"
+attrs = "^21.2.0"
 beautifulsoup4 = "^4.9.1"
 click = "^7.1.2"
 colorama = "^0.4.3"
+dynaconf = "^3.1.7"
 gitpython = "^3.1.7"
 google-api-python-client = "^1.10.0"
 google-auth-httplib2 = "^0.0.4"
@@ -38,6 +43,7 @@ tabulate = "^0.8.7"
 tomlkit = "^0.7.0"
 tqdm = "^4.48.2"
 trio = "^0.16.0"
+trio-typing = "^0.5.1"
 typer = {extras = ["all"], version = "^0.3.2"}
 xlsxwriter = "^1.3.3"
 
