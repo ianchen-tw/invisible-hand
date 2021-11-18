@@ -3,7 +3,6 @@ from typing import List
 import typer
 from typer import Argument
 
-# from .cmd_config import app as cmd_config_app
 from hand.config import settings
 from ..check import DoCheck
 from ..opt import Opt
@@ -19,7 +18,11 @@ def add_students(
     dry: bool = Opt.DRY,
 ):
     """Add student to Github Organization"""
-    DoCheck(gh_config_valid=True).run()
+
+    result = DoCheck(gh_config_valid=True).run(settings=settings)
+    if result.success == False:
+        typer.echo(result.info)
+        raise typer.Abort()
 
     org, team = settings.github.org, settings.add.student_team
 
