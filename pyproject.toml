@@ -15,7 +15,7 @@ packages = [
 ]
 
 [tool.poetry.scripts]
-hand = "hand.cli.app:app"
+hand = "hand.cli.main:app"
 
 [tool.poetry.dependencies]
 attrs = "^21.2.0"
