@@ -19,7 +19,7 @@ def add_students(
 ):
     """Add student to Github Organization"""
 
-    result = DoCheck(gh_config_valid=True).run(settings=settings)
+    result = DoCheck(settings=settings).withOptions(gh_config_valid=True).run()
     if result.success == False:
         typer.echo(result.info)
         raise typer.Abort()

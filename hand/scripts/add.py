@@ -43,6 +43,7 @@ class ScriptAddStudents(Script):
     dry_run: bool
 
     def run(self):
+        """The main script executing function"""
         self.step_get_team_members()
 
         invalids = self.step_check_invalid_handles()

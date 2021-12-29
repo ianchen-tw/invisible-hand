@@ -1,3 +1,5 @@
+from typing import Optional
+
 from attr import attrs
 
 from hand.api.github import GithubAPI
@@ -13,40 +15,62 @@ class CheckResult:
 
 
 @attrs(auto_attribs=True, frozen=True)
+class CheckOptions:
+    # Checks
+    gh_config_valid: bool
+    google_client_secret_file_exist: bool
+    git_cached: bool
+
+
 class DoCheck:
     """Automatically check environments"""
 
-    # Checks
-    gh_config_valid: bool = False
-    google_client_secret_file_exist: bool = False
-    git_cached: bool = False
+    def __init__(self, settings: HandConfig, output_result: bool = False):
+        self._config = settings
+        self._opt: Optional[CheckOptions] = None
+        self._output_result: bool = output_result
 
-    # Behavior arguments
-    output_result: bool = False
+        # public accessable
+        token, org = self._config.github.token, self._config.github.org
+        self.gh_api = GithubAPI(token=token, org=org)
+
+    def withOptions(
+        self,
+        gh_config_valid: bool = False,
+        google_client_secret_file_exist: bool = False,
+        git_cached: bool = False,
+    ) -> "DoCheck":
+        opt = CheckOptions(
+            gh_config_valid=gh_config_valid,
+            google_client_secret_file_exist=google_client_secret_file_exist,
+            git_cached=git_cached,
+        )
+        self._opt = opt
+        return self
 
     # TODO: add log
-    def run(self, settings: HandConfig) -> CheckResult:
+    def run(self) -> CheckResult:
         """Start checking, will simply stop program if failed"""
 
-        if self.gh_config_valid:
-            token, org = settings.github.token, settings.github.org
+        if self._opt.gh_config_valid:
+            token, org = self._config.github.token, self._config.github.org
 
             if token == DEFAULT_SETTING:
-                return CheckResult(False, "You should update your gh_token")
+                return CheckResult(False, "DoCheck: You should update your gh_token")
             elif org == DEFAULT_SETTING:
-                return CheckResult(False, "You should update your gh org")
-            elif not GithubAPI(token=token, org=org).can_access_org():
-                return CheckResult(False, "cannot access ORG!")
+                return CheckResult(False, "DoCheck: You should update your gh org")
+            elif not self.gh_api.can_access_org():
+                return CheckResult(False, "DoCheck: cannot access ORG!")
 
-        if self.google_client_secret_file_exist:
+        if self._opt.google_client_secret_file_exist:
             from pathlib import Path
 
-            file_name = settings.google_spreadsheet.cred_filename
+            file_name = self._config.google_spreadsheet.cred_filename
 
             if not Path(file_name).expanduser().exists():
                 return CheckResult(False, "Google Sheet Client Secret File not exists")
 
-        if self.git_cached:
+        if self._opt.git_cached:
             import subprocess as sp
 
             procs = sp.Popen(["git", "config", "credential.helper"], stdout=sp.PIPE)
