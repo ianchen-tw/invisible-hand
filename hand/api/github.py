@@ -17,6 +17,10 @@ class GithubAPI:
         result = viewerIsOrgMember(client, org=self.org)
         return result if result is not None else False
 
+    def invite_user_to_team(self, team_slug: str, user: str) -> bool:
+        # TODO
+        return False
+
     # async def is_user_in_team(self, user: str, team: str) -> bool:
     #     pass
 
