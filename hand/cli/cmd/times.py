@@ -1,7 +1,10 @@
+from pathlib import Path
 from typing import Optional
 
+import typer
 from typer import Argument, Option
 
+from hand.config import settings
 from ..check import DoCheck
 from ..opt import Opt
 
@@ -26,8 +29,17 @@ def event_times(
     <repo-hash> : string in <repo>:<hash> format
             hw0-ianre657:cb75e99
     """
-    DoCheck(gh_config_valid=True)
+
+    result = DoCheck(settings=settings).withOptions(gh_config_valid=True).run()
+    if result.success == False:
+        typer.echo(result.info)
+        raise typer.Abort()
+
+    print("Check input file exists")
+    f = Path(input_file).expanduser()
+    if not f.exists():
+        typer.echo(f"File not exists :{f}")
+        raise typer.Abort()
 
     # additional checks
-    print("check input file exists")
     print("check input file format")
