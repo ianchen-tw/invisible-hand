@@ -3,6 +3,8 @@ from typing import Any, Dict, Optional
 import httpx
 from attr import attrs
 
+from hand.exchange import GitHubRepoCommit
+
 QL_ENDPOINT = "https://api.github.com/graphql"
 
 
@@ -20,6 +22,11 @@ class GithubAPI:
     def invite_user_to_team(self, team_slug: str, user: str) -> bool:
         # TODO
         return False
+
+    def commit_pushed_time(self, commit: GitHubRepoCommit) -> Optional[str]:
+        client = get_client(self.token)
+        result = commitPushedDate(client, self.org, commit)
+        return result
 
     # async def is_user_in_team(self, user: str, team: str) -> bool:
     #     pass
@@ -46,6 +53,35 @@ def get_client(token):
 
 
 # Queries
+
+
+def commitPushedDate(
+    client: httpx.Client, org: str, commit: GitHubRepoCommit
+) -> Optional[str]:
+    ql = """query ($org: String!, $repo: String!, $hash: String!) {
+                repository(owner: $org, name: $repo) {
+                    object(expression: $hash) {
+                        ... on Commit {
+                            pushedDate
+                        }
+                    }
+                }
+        }"""
+    result = client.post(
+        QL_ENDPOINT,
+        json={
+            "query": ql,
+            "variables": {"org": org, "repo": commit.name, "hash": commit.commit_hash,},
+        },
+    )
+    if result.status_code == 200:
+        body: Dict = result.json()
+        if body.get("errors", None) is not None:
+            print(body["errors"])
+            return None
+        else:
+            commit_obj: Dict[str, Any] = body["data"]["repository"]["object"]
+            return commit_obj["pushedDate"]
 
 
 def viewerIsOrgMember(client: httpx.Client, org: str) -> Optional[bool]:
