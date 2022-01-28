@@ -23,7 +23,7 @@ class GithubAPI:
         # TODO
         return False
 
-    def commit_pushed_time(self, commit: GitHubRepoCommit) -> Optional[str]:
+    def get_commit_pushed_time(self, commit: GitHubRepoCommit) -> Optional[str]:
         client = get_client(self.token)
         result = commitPushedDate(client, self.org, commit)
         return result
