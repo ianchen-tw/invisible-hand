@@ -2,6 +2,7 @@ from typing import List
 from unittest.mock import MagicMock
 
 import iso8601
+import pytest
 from attr import attrib, attrs
 
 from hand.exchange import GitHubCommitInfo, GitHubRepoCommit
@@ -13,8 +14,16 @@ from hand.scripts.times import (
 )
 
 
-def test_get_git_commit():
-    pass
+@pytest.mark.api
+def test_api_get_commit():
+    from hand.api.github import GithubAPI
+    from hand.config import settings
+
+    gh = GithubAPI(token=settings.github.token, org=settings.github.org)
+    target = GitHubRepoCommit(name="hw1-ianre657", commit_hash="4871d8afd")
+    push_time = gh.get_commit_pushed_time(target)
+    assert push_time is not None
+    print(f"\n push time of commit:{target} -> {push_time}")
 
 
 @attrs(auto_attribs=True)

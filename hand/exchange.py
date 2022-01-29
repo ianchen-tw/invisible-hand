@@ -9,5 +9,4 @@ class GitHubRepoCommit(BaseModel):
 class GitHubCommitInfo(BaseModel):
     commit_hash: str  # 7 characters hash value
     pushed_time: str
-    msg: str
     repo: str
