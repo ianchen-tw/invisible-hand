@@ -34,15 +34,18 @@ class DeadLinePassed:
 class ScriptTimesDisplay(Protocol):
     def add_result_dlpassed(self, p: DeadLinePassed):
         """Displaying output to the user"""
+        # left empty
         ...
 
     def print_report(self):
         """Display the execution report"""
+        # left empty
         ...
 
 
 @attrs(auto_attribs=True)
 class ScriptTimesDisplayImpl(ScriptTimesDisplay):
+    """Display output to the end user"""
 
     deadline: str
     nm_queried: int = attrib(default=0)
