@@ -15,6 +15,7 @@ class FakeGithubAPI:
 def test_add_student():
     fake_gh_api = FakeGithubAPI()
     team = "test_team"
+
     user_handles = ["a@gmail.com", "a", "bb", "sead"]
     script = ScriptAddStudents(
         gh_invite_team=team,
