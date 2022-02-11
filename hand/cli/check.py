@@ -1,6 +1,6 @@
 from typing import Optional
 
-from attr import attrs
+from attr import define
 
 from hand.api.github import GithubAPI
 from hand.config import HandConfig
@@ -8,13 +8,13 @@ from hand.config import HandConfig
 DEFAULT_SETTING = "<override>"
 
 
-@attrs(auto_attribs=True, frozen=True)
+@define(frozen=True)
 class CheckResult:
     success: bool
     info: str = ""
 
 
-@attrs(auto_attribs=True, frozen=True)
+@define(frozen=True)
 class CheckOptions:
     # Checks
     gh_config_valid: bool
