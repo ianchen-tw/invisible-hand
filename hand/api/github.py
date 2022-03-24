@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import httpx
 from attr import attrs
@@ -27,6 +27,20 @@ class GithubAPI:
         client = get_client(self.token)
         result = commitPushedDate(client, self.org, commit)
         return result
+
+    def repo_exists(self, repo: str) -> bool:
+        # TODO
+        return False
+
+    def query_repo_with_prefix(self, prefix: str) -> List[str]:
+        pass
+
+    def remote_branch_exists(self, repo: str, branch: str) -> bool:
+        return False
+
+    # TODO: change return value
+    def find_issue_with_title(self, repo: str, title: str) -> bool:
+        return False
 
     # async def is_user_in_team(self, user: str, team: str) -> bool:
     #     pass

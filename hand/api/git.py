@@ -8,12 +8,12 @@ from loguru import logger as log
 
 @define
 class GitApi:
-    def clone_remote(dst: Path, remote_url: str):
+    def clone_remote(self, dst: Path, remote_url: str):
         """Clone a remote repository into a local folder"""
         git.Repo.clone_from(remote_url, dst)
         log.info(f"clone repo: {remote_url} -> {dst}")
 
-    def sync_remote(dst: Path, remote_url: str):
+    def sync_remote(self, dst: Path, remote_url: str):
         """Synchronize a folder in dst with a git repo specified in remote url"""
         r: git.Repo = git.Repo(dst)
         remote = git.Remote(repo=r, name="origin").set_url(remote_url)
